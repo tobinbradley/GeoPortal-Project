@@ -1,0 +1,179 @@
+/**
+ * This file handles map initialization and events.
+ *
+ * @author  Tobin Bradley
+ * @license     MIT
+ */
+
+
+/*  Map Initialization  */
+function initializeMap() {
+
+    // initialize map
+    map = new L.Map('map', {center: new L.LatLng(parseFloat(config.default_map_center[0]), parseFloat(config.default_map_center[1])),
+        zoom: config.default_map_zoom, attributionControl: false, minZoom: config.default_map_min_zoom, maxZoom: config.default_map_max_zoom});
+
+
+    /*  Coordinate display  */
+    map.on('mousemove', function(event) {
+        $("#toolbar-coords").text(event.latlng.lng.toFixed(4) + " " + event.latlng.lat.toFixed(4));
+    });
+
+    /*
+        Reset minzoom of the map when layers are toggled by the layer control
+        By default leaflet will change the map zoom levels based on layers
+        If you really want that behavior you can take this out.
+    */
+    map.on('layeradd', function(event) {
+        map._layersMinZoom = config.default_map_min_zoom;
+        map._layersMaxZoom = config.default_map_max_zoom;
+    });
+
+    /* Add marker on locationfound event */
+    map.on('locationfound', function(e){
+        var radius = e.accuracy / 2;
+        $.publish("/layers/addmarker", [ e.latlng.lng, e.latlng.lat, 1, "<h5>GeoLocation</h5>You are within " + radius + " meters of this point." ]);
+    });
+
+    /*  Add Layers  */
+    var baseMaps = addMapLayers(config.base_map_layers);
+    var overlayMaps = addMapLayers(config.overlay_map_layers);
+
+    /*  Layer Control  */
+    layersControl = new L.Control.Layers(baseMaps, overlayMaps);
+    map.addControl(layersControl);
+
+    /*  Locate user position via GeoLocation API  */
+    $("#gps").click(function() { map.locate({ enableHighAccuracy: true }); });
+
+    /*  Opacity Slider */
+    $.each(overlayMaps, function(key, val) {
+        $('#opacitydll').append('<option value="' + val.options.id + '">' + key + '</option>');
+    });
+    $('#opacitySlider').slider({range: "min", min: 0.1, max: 1, step: 0.05, value: 0.50, stop: function(event, ui) {
+        theLayer = getLayerLeaflet( $('#opacitydll').val() );
+        if ( theLayer ) map._layers[theLayer].setOpacity( ui.value );
+    }});
+    $('#opacitydll').change(function() {
+        theLayer = getLayerLeaflet( $('#opacitydll').val() );
+        if ( theLayer ) $("#opacitySlider").slider( "option", "value", map._layers[theLayer].options.opacity );
+    });
+    $('#opacitySlider').sliderLabels('MAP','DATA');
+
+}
+
+
+/*
+    Adds layers to the map on initial map load.
+    Input array comes from the config.json file.
+    Returns a JSON object containing name:layer for each layer type for the layers control
+ */
+function addMapLayers(layersArray) {
+    var layers = {};
+    $.each(layersArray, function(index, value) {
+        if (value.wmsurl.indexOf("{x}") != -1) {
+            layers[value.name] = new L.TileLayer( value.wmsurl, value );
+        }
+        else {
+            layers[value.name] = new L.TileLayer.WMS( value.wmsurl, value );
+        }
+        if ( value.isVisible ) map.addLayer(layers[value.name]);
+    });
+    return layers;
+}
+
+/*  Get map layer from leaflet  */
+function getLayerLeaflet(layerID) {
+    var theLayer = null;
+    $.each(map._layers, function(index, val){
+        if (val.options.id == layerID ) theLayer = index;
+    });
+    return theLayer;
+}
+
+/*  Get layer from config  */
+function getLayerConfig(layerID) {
+    var theLayer = null;
+    $.each(config.overlay_map_layers, function(index, val){
+        if (val.id == layerID ) theLayer = val;
+    });
+    return theLayer;
+}
+
+/*  Programatically toggle layers on the layer control  */
+function toggleLayer(layerid) {
+    theLayer = getLayerConfig( layerid );
+    if (theLayer) {
+        $(".leaflet-control-layers-overlays label").each(function() {
+            if ( theLayer.name == $(this).text().trim() ) {
+                $(this).children("input").trigger("click");
+            }
+        });
+    }
+}
+
+/*
+    Perform identify based on map click.
+    Note minimum zoom level set - you might want to screw with that for your application.
+*/
+function identify(event) {
+    if (map.getZoom() >= 16) selectByCoordinate(event.latlng.lng, event.latlng.lat);
+}
+
+/*  Select parcel with lon,lat  */
+function selectByCoordinate(lon, lat) {
+    url = pointOverlay(lon, lat, 4326, 'tax_parcels', 'pid', "", 'json', '?');
+    $.getJSON(url, function(data){
+        if (data.total_rows > 0 ) {
+            url = config.web_service_base + "v1/ws_mat_pidgeocode.php?format=json&callback=?";
+            args = "&pid=" + urlencode(data.rows[0].row.pid);
+            url = url + args;
+            $.getJSON(url, function(data) {
+                if (data.total_rows > 0 ) {
+                    $.publish("/change/selected", [ data.rows[0].row ]);
+                    $.publish("/change/hash");
+                    $.publish("/layers/addmarker", [ data.rows[0].row.longitude, data.rows[0].row.latitude, 0, "<h5>Selected Property</h5>" + data.rows[0].row.address ]);
+                    $.publish("/change/hash");
+                    $.publish("/change/accordion", [ $("#accordion-data h3").eq($('#accordion-data').accordion('option', 'active')).attr("id") ]);
+                }
+            });
+        }
+    });
+}
+
+/*  Handle toolbar events  */
+function toolbar(tool) {
+    if (tool.attr("id") == "identify") {
+        map.on('click', identify);
+    }
+    else map.off('click', identify);
+}
+
+/*
+    Zoom to a latlong at a particular zoom level.
+    Note default zoom level if none is passed.
+*/
+function zoomToLonLat (lon, lat, zoom) {
+    var theZoom = zoom || 17;
+    map.setView(new L.LatLng(parseFloat(lat), parseFloat(lon)), theZoom);
+}
+
+
+/*
+    Add markers to the map.
+    The default rule here is 1 marker of each type at a time, but you could fiddle with that.
+    You can add custom markers for each type.
+*/
+function addMarker(lon, lat, featuretype, label) {
+    zoomToLonLat(lon, lat, 17);
+
+    var blueIcon = L.Icon.extend({});
+    var orangeIcon = L.Icon.extend( { iconUrl: './js/libs/leaflet/images/marker2.png' });
+    var icons = [ new blueIcon(), new orangeIcon() ];
+
+    if (null != markers[featuretype]) map.removeLayer(markers[featuretype]);
+    markers[featuretype] = new L.Marker(new L.LatLng(parseFloat(lat), parseFloat(lon)), { icon: icons[featuretype] });
+    map.addLayer(markers[featuretype]);
+
+    markers[featuretype].bindPopup(label).openPopup();
+}

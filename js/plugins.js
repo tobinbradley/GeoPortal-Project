@@ -42,7 +42,7 @@ window.log = function(){
                     if (item.row.lon) {
                         zoomClick = 'onclick="addMarker(' + item.row.lon + ',' + item.row.lat + ', 1, \'<h5>' + item.row.name + '</h5>' + item.row.address + '\')"';
                         routeurl = googleRoute(selectedAddress.address + ' NC', item.row.lat + ',' + item.row.lon );
-                        writebuffer += "<td class='" + settings.colClass + "'><a href='javascript:void(0);' title='Locate on the map.' " + zoomClick + "><img src='img/find.gif' style='margin: 0px' /></a></td><td class='" + settings.colClass + "'><a href='" + routeurl + "' target='_blank' title='Get driving directions.'><img src='img/car.png' style='margin: 0px' /></a></td>";
+                        writebuffer += "<td class='" + settings.colClass + "'><a href='javascript:void(0);' title='Locate on the map.' data-coords='" + item.row.lon + "," + item.row.lat + "' data-label='<h5>" + item.row.name + "</h5>" + item.row.address + "' class='locate'><img src='img/find.gif' style='margin: 0px' /></a></td><td class='" + settings.colClass + "'><a href='" + routeurl + "' target='_blank' title='Get driving directions.'><img src='img/car.png' style='margin: 0px' /></a></td>";
                     }
                     for (i = 0; i < settings.fields.length; i++) {
                         writebuffer += '<td class="' + settings.colClass + '">' + eval(settings.fields[i]) + '</td>';

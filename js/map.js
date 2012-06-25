@@ -130,11 +130,9 @@ function selectByCoordinate(lon, lat) {
             url = url + args;
             $.getJSON(url, function(data) {
                 if (data.total_rows > 0 ) {
-                    $.publish("/change/selected", [ data.rows[0].row ]);
-                    $.publish("/change/hash");
-                    $.publish("/layers/addmarker", [ data.rows[0].row.longitude, data.rows[0].row.latitude, 0, "<h5>Selected Property</h5>" + data.rows[0].row.address ]);
-                    $.publish("/change/hash");
-                    $.publish("/change/accordion", [ $("#accordion-data h3").eq($('#accordion-data').accordion('option', 'active')).attr("id") ]);
+                    message = "<h5>Identfy</h5>" + data.rows[0].row.address + "<br />PID: " + data.rows[0].row.parcel_id;
+                    message += "<br /><br /><strong><a href='javascript:void(0)' class='identify_select' data-matid='" + data.rows[0].row.objectid + "' onclick='locationFinder(\"Address\", \"master_address_table\", \"objectid\", " + data.rows[0].row.objectid + ");'>Select this Location</a></strong>";
+                    $.publish("/layers/addmarker", [ data.rows[0].row.longitude, data.rows[0].row.latitude, 1, message ]);
                 }
             });
         }

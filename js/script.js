@@ -39,6 +39,10 @@ $(document).ready(function() {
     // Click events
     $(".searchoptions").click(function(){ $('#search-dialog').dialog('open'); });
     $("#searchinput").click(function() { $(this).select(); });
+    $(".datatable").on("click", "a.locate", function() {
+        coords = $(this).data("coords").split(",");
+        $.publish("/layers/addmarker", [ coords[0], coords[1], 1, $(this).data("label") ]);
+    });
 
     //  Map toolbar
     $("#mapcontrols").buttonset();

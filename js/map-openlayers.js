@@ -212,14 +212,11 @@ function onFeatureUnselect(feature) {
 }
 
 
-/**
- * Add markers (vector) to the map.
- * Also removes popups and selects added feature.
- * @param {float} long
- * @param {float} lat
- * @param {featuretype} the type of feature/marker (0=address,1=facility,2=identify)
- * @param {label} the content to put in the popup
- */
+/*
+    Add markers to the map.
+    The default rule here is 1 marker of each type at a time, but you could fiddle with that.
+    You can add custom markers for each type.
+*/
 function addMarker(lon, lat, featuretype, label) {
     if (featuretype === 0) zoomToLonLat (lon, lat, 17);
 

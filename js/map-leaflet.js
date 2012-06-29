@@ -167,7 +167,7 @@ function addMarker(lon, lat, featuretype, label) {
     if (featuretype === 0) zoomToLonLat(lon, lat, 17);
 
     var blueIcon = L.Icon.extend({ iconUrl: './img/marker.png', shadowUrl: './img/marker-shadow.png' });
-    var orangeIcon = L.Icon.extend( { iconUrl: './img/marker2.png', shadowUrl: '.img/marker-shadow.png' });
+    var orangeIcon = L.Icon.extend( { iconUrl: './img/marker2.png', shadowUrl: './img/marker-shadow.png' });
     var icons = [ new blueIcon(), new orangeIcon() ];
 
     if (null != markers[featuretype]) map.removeLayer(markers[featuretype]);

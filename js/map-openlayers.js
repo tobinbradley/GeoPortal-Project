@@ -5,12 +5,8 @@
 */
 
 
-/**
- * Globals specifically for OpenLayers Use
- */
+/*  Globals specifically for OpenLayers Use  */
 var selectControl;  // OpenLayers select control for vector marker layer
-
-
 
 /*  Map Initialization  */
 function initializeMap(){
@@ -32,34 +28,26 @@ function initializeMap(){
         map.getProjectionObject()
         ), config.default_map_zoom);
 
-
-
-
-    // Vector Marker Layer
+    // Vector marker layer
     var styleMap = new OpenLayers.StyleMap({
         fillOpacity: 1,
         pointRadius: 18
     });
-    // images for vector marker layer
-    // 0=selected, 1=facility, 2=identify
     var lookup = {
         0: {externalGraphic: "img/marker.png", graphicWidth: 25, graphicHeight: 41, backgroundGraphic: "img/marker-shadow.png", graphicYOffset: -40, backgroundWidth: 41, backgroundHeight: 41, backgroundXOffset: -12, backgroundYOffset: -40 },
         1: {externalGraphic: "img/marker2.png", graphicWidth: 25, graphicHeight: 41, backgroundGraphic: "img/marker-shadow.png", graphicYOffset: -40, backgroundWidth: 41, backgroundHeight: 41, backgroundXOffset: -12, backgroundYOffset: -40 }
-    }
+    };
     styleMap.addUniqueValueRules("default", "type", lookup);
     var markerLayer = new OpenLayers.Layer.Vector('Map Markers', {
         styleMap: styleMap, displayInLayerSwitcher: false
     });
     map.addLayer(markerLayer);
 
-
     // Map Controls
     map.addControl(new OpenLayers.Control.MousePosition({'div': OpenLayers.Util.getElement('toolbar-coords')}));
     map.addControl(new OpenLayers.Control.LayerSwitcher());
-
-    // Add selection control for marker layer
     selectControl = new OpenLayers.Control.SelectFeature(markerLayer,
-                {onSelect: onFeatureSelect, onUnselect: onFeatureUnselect, stopSingle: true});
+        {onSelect: onFeatureSelect, onUnselect: onFeatureUnselect, stopSingle: true});
     map.addControl(selectControl);
     selectControl.activate();
 
@@ -78,7 +66,7 @@ function initializeMap(){
         });
     }
 
-    /*  Opacity Slider */
+    /*  Opacity Slider  */
     $.each(config.overlay_map_layers, function(key, val) {
         $('#opacitydll').append('<option>' + val.name + '</option>');
     });
@@ -93,6 +81,7 @@ function initializeMap(){
     $('#opacitySlider').sliderLabels('MAP','DATA');
 }
 
+
 /*
     Adds layers to the map on initial map load.
     Input array comes from the config.json file.
@@ -103,11 +92,12 @@ function addMapLayers(layersArray) {
     $.each(layersArray, function(index, value) {
         var layer;
         if (value.wmsurl.indexOf("{x}") != -1) {
-            //layer = new OpenLayers.Layer.XYZ (
-            //    value.name,
-            //    value.wmsurl
-            //);
-            layer = new OpenLayers.Layer.OSM( "OpenStreetMap");
+            if (value.id == "osm") {
+                layer = new OpenLayers.Layer.OSM( "OpenStreetMap");
+            }
+            else {
+                layer = new OpenLayers.Layer.XYZ ( value.name, value.wmsurl );
+            }
         }
         else {
             layer = new OpenLayers.Layer.WMS(
@@ -180,12 +170,10 @@ function selectByCoordinate(lon, lat) {
     });
 }
 
-/**
- * Zoom to a latlong at a particular zoom level. Projects wgs84 to 900913
- * @param {float} long
- * @param {float} lat
- * @param {integer} zoom
- */
+/*
+    Zoom to a latlong at a particular zoom level.
+    Note default zoom level if none is passed.
+*/
 function zoomToLonLat (lon, lat, zoom) {
     zoom = zoom || 17;
     point = new OpenLayers.Geometry.Point(lon, lat);
@@ -194,21 +182,10 @@ function zoomToLonLat (lon, lat, zoom) {
 }
 
 
-/**
- * Zoom to a latlong at a particular zoom level
- * @param {float} long
- * @param {float} lat
- * @param {integer} zoom
- */
-function zoomTo (x, y, zoom) {
-    map.setCenter(new OpenLayers.LonLat(x, y), zoom);
-}
-
-
 /* Marker Vector Layer Popups */
 function onPopupClose(evt) {
     selectControl.unselectAll();
-    OpenLayers.Event.stop(evt);
+    OpenLayers.Event.stop(evt);  // prevent an identify from firing
 }
 function onFeatureSelect(feature) {
     selectedFeature = feature;
@@ -244,6 +221,8 @@ function onFeatureUnselect(feature) {
  * @param {label} the content to put in the popup
  */
 function addMarker(lon, lat, featuretype, label) {
+    if (featuretype === 0) zoomToLonLat (lon, lat, 17);
+
     // remove old features of same type
     var markerLayer = getLayerOpenLayers("Map Markers");
     feats = markerLayer.features;
@@ -253,15 +232,8 @@ function addMarker(lon, lat, featuretype, label) {
     // Add new feature
     point = new OpenLayers.Geometry.Point(lon, lat);
     OpenLayers.Projection.transform(point, map.displayProjection, map.getProjectionObject());
-    label = '<div>' + label + "</div>";
-    label += '<br /><div><a href="#" onclick="zoomTo(' + point.x + ', ' + point.y + ', 8); return false">Zoom to Feature</a></div>';
     feature = new OpenLayers.Feature.Vector(point, {type: featuretype, label: label} );
-
     markerLayer.addFeatures(feature);
-    // zoom to feature
-    zoomToLonLat (lon, lat, map.getNumZoomLevels() - 3);
-
-    // open feature popup if map width greater than 500 pixels (hides on portables)
-    if ($("#map").width() > 600 ) selectControl.select(feature);
+    selectControl.select(feature);
 }
 

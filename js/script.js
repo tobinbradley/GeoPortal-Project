@@ -50,6 +50,22 @@ $(document).ready(function() {
     $("#mapcontrols input:radio").click( function() { toolbar($(this)); });
     $("#toolbar").fadeIn("slow");
 
+    // URL Hash Change Handler
+    $(window).hashchange( function(){
+        // read the hash
+        theHash = window.location.hash.split("/");
+
+        // Process active record change
+        if (theHash[1] && theHash[1] != selectedAddress.objectid) {
+            locationFinder("Address", 'master_address_table', 'objectid', theHash[1]);
+        }
+
+        // Process accordion change
+        if (theHash[2] && theHash[2] != $("#accordion-data h3").eq($('#accordion-data').accordion('option', 'active')).attr("id")) {
+            $('#accordion-data').accordion('activate', '#' + theHash[2]);
+        }
+    });
+
     // Inital PubSub Subscriptions
     $.subscribe("/change/hash", changeHash);  // Hash change control
     $.subscribe("/change/selected", setSelectedAddress);  // Selected record change
@@ -255,13 +271,13 @@ function accordionDataClearShow() {
     $('.selected-data').show();
 }
 
-/**
- * Find locations
- * @param {string} findType  The type of find to perform
- * @param {string} findTable  The table to search on
- * @param {string} findField  The field to search in
- * @param {string} findID  The value to search for
- * @param {string} findValue  The value to search for (street name)
+/*
+    Find locations
+    @param {string} findType  The type of find to perform
+    @param {string} findTable  The table to search on
+    @param {string} findField  The field to search in
+    @param {string} findID  The value to search for
+    @param {string} findValue  The value to search for (street name)
 */
 function locationFinder(findType, findTable, findField, findID, findValue) {
     switch (findType) {
@@ -272,7 +288,6 @@ function locationFinder(findType, findTable, findField, findID, findValue) {
                     $.publish("/change/selected", [ data.rows[0].row ]);
                     $.publish("/change/hash");
                     $.publish("/layers/addmarker", [ data.rows[0].row.longitude, data.rows[0].row.latitude, 0, "<h5>Selected Property</h5>" + data.rows[0].row.address ]);
-                    $.publish("/change/hash");
                     $.publish("/change/accordion", [ $("#accordion-data h3").eq($('#accordion-data').accordion('option', 'active')).attr("id") ]);
                 }
             });

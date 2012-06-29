@@ -1,0 +1,36 @@
+CACHE MANIFEST
+# v111111
+
+# Explicitly cached 'master entries'.
+CACHE:
+index.html
+favicon.ico
+apple-touch-icon.png
+css/style.css
+img/gp_logo.png
+img/car.png
+img/find.gif
+img/marker.png
+img/marker2.png
+img/marker-shadow.png
+img/ui-anim_basic_16x16.gif
+js/config.json
+js/plugins.js
+js/script.js
+js/libs/modernizr.custom.js
+
+# The following are specific to the mapping library you want to use
+# js/map-leaflet.js
+# js/libs/leaflet/leaflet.css
+# js/libs/leaflet/leaflet.js
+# js/libs/leaflet/images/layers.png
+# js/libs/leaflet/images/popup-close.png
+# js/libs/leaflet/images/zoom-in.png
+# js/libs/leaflet/images/zoom-out.png
+
+
+
+# Everything else: go sponge on somebody's wifi
+NETWORK:
+*
+

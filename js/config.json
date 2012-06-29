@@ -15,8 +15,9 @@
 			"transparent" : false,
 			"opacity" : 1,
 			"maxZoom" : 18,
-			"minZoom": 0,
-			"isVisible" : true
+			"minZoom": 9,
+			"isVisible" : true,
+			"isBaseLayer" : true
 		},
 		{
 			"id" : "osm",
@@ -24,8 +25,9 @@
 			"attribution" : "Provided by Tiles@Home",
 			"wmsurl" : "http://tile.openstreetmap.org/{z}/{x}/{y}.png",
 			"maxZoom" : 18,
-			"minZoom" : 0,
-			"isVisible": false
+			"minZoom" : 9,
+			"isVisible": false,
+			"isBaseLayer" : true
 		}
 	],
 	"overlay_map_layers" : [
@@ -39,8 +41,9 @@
 			"transparent" : true,
 			"opacity" : 0.5,
 			"maxZoom" : 18,
-			"minZoom" : 0,
-			"isVisible" : false
+			"minZoom" : 9,
+			"isVisible" : false,
+			"isBaseLayer" : false
 		},
 		{
 			"id" : "environment",
@@ -53,7 +56,8 @@
 			"opacity" : 0.5,
 			"maxZoom" : 18,
 			"minZoom" : 15,
-			"isVisible" : false
+			"isVisible" : false,
+			"isBaseLayer" : false
 		},
 		{
 			"id" : "impervious_surface",
@@ -66,7 +70,9 @@
 			"opacity" : 0.5,
 			"maxZoom" : 18,
 			"minZoom" : 17,
-			"isVisible" : false
+			"isVisible" : false,
+			"isBaseLayer" : false,
+			"projection" : "EPSG:102113"
 		}
 	]
 }

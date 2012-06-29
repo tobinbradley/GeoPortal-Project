@@ -33,12 +33,13 @@ $(document).ready(function() {
     // jQuery UI Dialogs
     $("#search-dialog").dialog({ width: $("#searchdiv").width(), autoOpen: false, show: 'fade', hide: 'fade' });
 
-    // Show GeoLocation link under search box if browser supports it
-    if (Modernizr.geolocation) $("#gpsarea").show();
-
     // Click events
     $(".searchoptions").click(function(){ $('#search-dialog').dialog('open'); });
     $("#searchinput").click(function() { $(this).select(); });
+    $(".selectedLocation").on("click", "a", function() {
+        args = $(this).data("panzoom").split(',');
+        $.publish("/map/panzoom", [ args[0], args[1], args[2] ]);
+    });
     $(".datatable").on("click", "a.locate", function() {
         coords = $(this).data("coords").split(",");
         $.publish("/layers/addmarker", [ coords[0], coords[1], 1, $(this).data("label") ]);
@@ -49,9 +50,6 @@ $(document).ready(function() {
     $("#mapcontrols input:radio").click( function() { toolbar($(this)); });
     $("#toolbar").fadeIn("slow");
 
-    // Set initial focus on search box
-    $("#searchinput").focus();
-
     // Inital PubSub Subscriptions
     $.subscribe("/change/hash", changeHash);  // Hash change control
     $.subscribe("/change/selected", setSelectedAddress);  // Selected record change
@@ -59,6 +57,7 @@ $(document).ready(function() {
     $.subscribe("/change/selected", accordionDataClearShow);  // Selected record change
     $.subscribe("/change/accordion", processAccordionDataChange);  // Change accordion
     $.subscribe("/layers/addmarker", addMarker);  // Add marker
+    $.subscribe("/map/panzoom", zoomToLonLat);  // Zoom to location and zoom
 
 
     // jQuery UI Autocomplete
@@ -230,6 +229,7 @@ function processAccordionDataChange(accordionValue) {
 }
 
 
+
 /*  Set selected address  */
 function setSelectedAddress(record) {
     selectedAddress = {
@@ -246,8 +246,7 @@ function setSelectedAddress(record) {
 
 /*  update selected location text  */
 function setLocationText(record) {
-    selectedLocation = '<strong><a href="javascript:void(0)" onclick="zoomToLonLat(' + record.longitude +', ' + record.latitude + ', 17);"> ' + record.address + '</a></strong>';
-    $('.selectedLocation').html(selectedLocation);
+    $('.selectedLocation').html('<strong><a href="javascript:void(0)" data-panzoom="' + record.longitude + ', ' + record.latitude + ', 17" > ' + record.address + '</a></strong>');
 }
 
 /*  clear data areas and make them visible  */

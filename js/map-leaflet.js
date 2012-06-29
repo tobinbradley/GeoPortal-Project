@@ -1,18 +1,16 @@
-/**
- * This file handles map initialization and events.
- *
- * @author  Tobin Bradley
- * @license     MIT
- */
+/*
+    This file handles map initialization and events.
+    @author  Tobin Bradley
+    @license     MIT
+*/
 
 
 /*  Map Initialization  */
 function initializeMap() {
 
-    // initialize map
+    /*  initialize map  */
     map = new L.Map('map', {center: new L.LatLng(parseFloat(config.default_map_center[0]), parseFloat(config.default_map_center[1])),
         zoom: config.default_map_zoom, attributionControl: false, minZoom: config.default_map_min_zoom, maxZoom: config.default_map_max_zoom});
-
 
     /*  Coordinate display  */
     map.on('mousemove', function(event) {
@@ -44,7 +42,10 @@ function initializeMap() {
     map.addControl(layersControl);
 
     /*  Locate user position via GeoLocation API  */
-    $("#gps").click(function() { map.locate({ enableHighAccuracy: true }); });
+    if (Modernizr.geolocation) {
+        $("#gpsarea").show();
+        $("#gps").click(function() { map.locate({ enableHighAccuracy: true }); });
+    }
 
     /*  Opacity Slider */
     $.each(overlayMaps, function(key, val) {
@@ -165,8 +166,8 @@ function zoomToLonLat (lon, lat, zoom) {
 function addMarker(lon, lat, featuretype, label) {
     zoomToLonLat(lon, lat, 17);
 
-    var blueIcon = L.Icon.extend({});
-    var orangeIcon = L.Icon.extend( { iconUrl: './js/libs/leaflet/images/marker2.png' });
+    var blueIcon = L.Icon.extend({ iconUrl: './img/marker.png', shadowUrl: './img/marker-shadow.png' });
+    var orangeIcon = L.Icon.extend( { iconUrl: './img/marker2.png', shadowUrl: '.img/marker-shadow.png' });
     var icons = [ new blueIcon(), new orangeIcon() ];
 
     if (null != markers[featuretype]) map.removeLayer(markers[featuretype]);

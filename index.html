@@ -4,51 +4,53 @@
 <!--[if IE 7]>    <html class="no-js ie7 oldie" lang="en"> <![endif]-->
 <!--[if IE 8]>    <html class="no-js ie8 oldie" lang="en"> <![endif]-->
 <!-- Consider adding an manifest.appcache: h5bp.com/d/Offline -->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="en"> <!--<![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" manifest="manifest.appcache"> <!--<![endif]-->
 <head>
-	<meta charset="utf-8">
+    <meta charset="utf-8">
 
-	<!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame
-		 Remove this if you use the .htaccess -->
-	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame -->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-	<title>GeoPortal - Mecklenburg County GIS</title>
-	<meta name="description" content="GeoPortal - One stop shopping for location information.">
-	<meta name="author" content="Tobin Bradley">
+    <title>GeoPortal - Mecklenburg County GIS</title>
+    <meta name="description" content="GeoPortal - One stop shopping for location information.">
+    <meta name="author" content="Tobin Bradley">
 
-	<!-- Allow all robots -->
-	<meta content="all" name="robots" />
+    <!-- Allow all robots -->
+    <meta content="all" name="robots" />
 
-	<!-- turn off IE image toolbar -->
+    <!-- turn off IE image toolbar -->
     <meta content="no" http-equiv="imagetoolbar" />
 
-	<!-- Mobile viewport optimized -->
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Mobile viewport optimized -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes" />
 
-	<!-- Favicon and apple touch icon. Apple touch icons should be 57x57px -->
-	<link rel="shortcut icon" href="favicon.ico">
-	<link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <!-- Favicon and apple touch icon. Apple touch icons should be 57x57px -->
+    <link rel="shortcut icon" href="favicon.ico">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
 
-	<!-- jQuery UI CSS -->
-	<link type="text/css" media="all" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/themes/blitzer/jquery-ui.css" rel="stylesheet" />
+    <!-- jQuery UI CSS -->
+    <link type="text/css" media="all" href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/themes/blitzer/jquery-ui.css" rel="stylesheet" />
 
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="js/libs/leaflet/leaflet.css" />
+    <!-- Toss these next 2 lines if you are using OpenLayers -->
+    <!--<link rel="stylesheet" href="js/libs/leaflet/leaflet.css" />-->
     <!--[if lte IE 8]><link rel="stylesheet" href="js/libs/leaflet/leaflet.ie.css" /><![endif]-->
 
-	<!-- CSS: implied media="all" -->
-	<link rel="stylesheet" href="css/style.css">
+    <!-- CSS: implied media="all" -->
+    <link rel="stylesheet" href="css/style.css">
 
-	<!-- Modernizr should be the only JavaScript in the head. The rest is at the bottom of the page. -->
-	<script src="js/libs/modernizr.custom.js"></script>
+    <!-- Modernizr in the head. The rest of the JavaScript is at the bottom of the page. -->
+    <script src="js/libs/modernizr.custom.js"></script>
 
 </head>
 
-<body ng-app>
+<body>
 
     <div id="container">
 
-		<header>
+        <header>
 
             <!-- Header logo -->
             <div id="logo" class="logo alignleft">
@@ -57,19 +59,19 @@
 
             <!-- Search -->
             <div id="searchdiv" class="screen-only">
-				<input id="searchinput" class="ui-corner-all" x-webkit-speech speech placeholder="Start here!" />
+                <input id="searchinput" class="ui-corner-all" x-webkit-speech speech placeholder="Start here!" />
                 <p class="mute">
                     <span id="gpsarea" class="hidden">
                         <a href="javascript:void(0)" id="gps">Find My Location</a> &bull;
                     </span>
                     <a class="searchoptions" href="javascript:void(0)">Help</a>
                 </p>
-			</div>
+            </div>
 
-		</header>
+        </header>
 
-		<!-- Sidebar -->
-		<aside>
+        <!-- Sidebar -->
+        <aside>
 
             <!-- Data Accordion -->
             <div id="accordion-data" class="accordion hidden">
@@ -184,28 +186,25 @@
                         </table>
                     </div>
                 </div>
-                <h3 id="MAPCONTROLS"><a href="javascript:void(0)">Map Controls and Legend</a></h3>
+                <h3 id="MAPCONTROLS"><a href="javascript:void(0)">Map Controls</a></h3>
                 <div class="textcenter">
                     <h5 class="opacityControl">Layer Opacity</h5>
                     <select id="opacitydll" class="opacityControl"></select>
                     <div id="opacitySlider" class="opacityControl"></div>
-                     <img src="img/legend.png" />
                 </div>
             </div>
 
-            <div class="textcenter mute" style="margin-top: 20px; ">
-                <hr style="clear:both; width: 90%; margin: 0 auto; height: 3px;" />
-
+            <div id="sidebar-footer" class="textcenter mute">
+                <hr />
                 Created by <a href="http://emaps.charmeck.org">Mecklenburg County GIS</a>
                 <br />
-                Fork me on <a href="javascript:void(0)">Github</a>
-
+                Fork me on <a href="https://github.com/tobinbradley">Github</a>
             </div>
 
-		</aside>
+        </aside>
 
-		<!-- Map area -->
-		<div id="map-container">
+        <!-- Map area -->
+        <div id="map-container">
 
             <!-- Toolbar area -->
             <div id="toolbar" class="screen-only hidden">
@@ -224,48 +223,51 @@
             </div>
 
             <!-- Map -->
-			<div id="map" class="ui-corner-all"></div>
-		</div>
+            <div id="map" class="ui-corner-all"></div>
+        </div>
 
-	</div> <!-- end of #container -->
-
-
-	<!-- JavaScript at the bottom for fast page loading -->
-
-	<!-- Grab Google CDN's jQuery and jQuery UI -->
-	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
-	<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/jquery-ui.min.js"></script>
-
-    <!-- angular.js -->
-    <script src="js/libs/angular-1.0.0.min.js"></script>
-
-	<!-- Scripts for leaflet maps -->
-	<script src="js/libs/leaflet/leaflet.js"></script>
-	<script src="js/map.js"></script>
-
-	<!-- scripts concatenated and minified via ant build script-->
-	<script src="js/plugins.js"></script>
-	<script src="js/script.js"></script>
-
-	<!-- end scripts-->
+    </div> <!-- end of #container -->
 
 
-	<!-- The following content is not displayed at run time -->
+    <!-- JavaScript at the bottom for fast page loading -->
 
-	<!-- Welcome screen - jQuery UI Dialog -->
-	<div id="search-dialog" title="Search Help" class="hidden">
-		<p class="textcenter">
+    <!-- Grab Google CDN's jQuery and jQuery UI -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.7.2/jquery.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.8.21/jquery-ui.min.js"></script>
+
+    <!-- Mapping Library - Leaflet or OpenLayers -->
+    <!--<script src="js/libs/leaflet/leaflet.js"></script>
+    <script src="js/map-leaflet.js"></script>-->
+
+    <!-- OpenLayers Library -->
+    <!-- For deployment you should really host the OpenLayers Library locally so an OpenLayers upgrade -->
+    <!-- doesn't break your stuff. -->
+    <script src="http://openlayers.org/api/OpenLayers.js"></script>
+    <script src="js/map-openlayers.js"></script>
+
+    <!-- Standard scripts -->
+    <script src="js/plugins.js"></script>
+    <script src="js/script.js"></script>
+
+    <!-- end scripts-->
+
+
+    <!-- The following content is not displayed at run time -->
+
+    <!-- Welcome screen - jQuery UI Dialog -->
+    <div id="search-dialog" title="Search Help" class="hidden">
+        <p class="textcenter">
             <iframe width="350" height="262" src="http://www.youtube-nocookie.com/embed/aGlmVQXRRj4?rel=0" frameborder="0" allowfullscreen></iframe>
         </p>
         <p>
           Type in the first part of an address or location and <em>let the search box do the work for you</em>.
           Select a match using either the mouse or the up/down arrow keys and Enter.
         </p>
-		<p><span class="ui-icon ui-icon-circle-check alignleft"></span><strong>Address</strong>: Enter the first part of the address. Ex: for 700 North Tryon Street, try <em>700 n</em></p>
-		<p><span class="ui-icon ui-icon-circle-check alignleft"></span><strong>Place or Street</strong>: Enter any part of a place or street name. Ex: type <em>carolina</em></p>
-		<p><span class="ui-icon ui-icon-circle-check alignleft"></span><strong>Intersection</strong>: Enter a street name, followed by an &amp;. Ex: type <em>ruth &amp;</em></p>
-		<p><span class="ui-icon ui-icon-circle-check alignleft"></span><strong>Parcel ID</strong>: Enter an 8-digit Parcel ID. Ex: type <em>11111111</em></p>
-	</div>
+        <p><span class="ui-icon ui-icon-circle-check alignleft"></span><strong>Address</strong>: Enter the first part of the address. Ex: for 700 North Tryon Street, try <em>700 n</em></p>
+        <p><span class="ui-icon ui-icon-circle-check alignleft"></span><strong>Place or Street</strong>: Enter any part of a place or street name. Ex: type <em>carolina</em></p>
+        <p><span class="ui-icon ui-icon-circle-check alignleft"></span><strong>Intersection</strong>: Enter a street name, followed by an &amp;. Ex: type <em>ruth &amp;</em></p>
+        <p><span class="ui-icon ui-icon-circle-check alignleft"></span><strong>Parcel ID</strong>: Enter an 8-digit Parcel ID. Ex: type <em>11111111</em></p>
+    </div>
 
 
 </body>

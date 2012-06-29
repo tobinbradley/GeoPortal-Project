@@ -241,7 +241,7 @@ aside {
   z-index: 1;
   position: absolute;
   left: 0;
-  top: 65px;
+  top: 70px;
   bottom: 0;
   width: 390px;
   overflow: auto;
@@ -251,7 +251,7 @@ aside {
 }
 #map-container {
   position: absolute;
-  top: 65px;
+  top: 70px;
   left: 390px;
   right: 0;
   bottom: 0;
@@ -285,7 +285,7 @@ aside {
   -ms-transition: all 0.25s ease-in-out;
   -o-transition: all 0.25s ease-in-out;
 }
-#searchinput:focus {
+#searchinput:focus, #searchinput:hover {
   outline: none;
   -webkit-box-shadow: 0 0 8px #9ecaed;
   -moz-box-shadow: 0 0 8px #9ecaed;
@@ -301,6 +301,8 @@ input::-moz-placeholder, textarea::-moz-placeholder { color: #7C7C7C; }
 .datatable caption { text-align: left; padding-top: 10px; font-size: 12px; font-weight: bold; }
 #opacitydll { margin-top: 4px; }
 #opacitySlider { margin: 10px 7px 0 7px; }
+#sidebar-footer { margin-top: 20px; }
+#sidebar-footer hr { clear:both; width: 90%; margin: 0 auto; height: 3px; }
 
 
 /* Map */

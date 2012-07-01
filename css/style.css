@@ -434,7 +434,7 @@ input::-moz-placeholder, textarea::-moz-placeholder { color: #7C7C7C; }
   pre, blockquote { border: 1px solid #999; page-break-inside: avoid; }
   thead { display: table-header-group; } /* h5bp.com/t */
   tr, img { page-break-inside: avoid; }
-  img { max-width: 100% !important; }
+  img { max-width: none !important; }
   @page { margin: 0.5cm; }
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3 { page-break-after: avoid; }
@@ -469,7 +469,7 @@ input::-moz-placeholder, textarea::-moz-placeholder { color: #7C7C7C; }
 
   /* map */
   .gmnoprint {display: none; width: 0; height: 0; }
-  .leaflet-top .leaflet-control { display: none; }
+  .leaflet-top .leaflet-control, .olControlZoom, .olControlLayerSwitcher { display: none; }
 
   /* jQuery Tweaks */
   .accordion h3, .ui-tabs-nav {display: none !important;}

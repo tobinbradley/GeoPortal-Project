@@ -70,6 +70,31 @@
 
         </header>
 
+
+        <!-- Map area -->
+        <div id="map-container">
+
+            <!-- Toolbar area -->
+            <div id="toolbar" class="screen-only hidden">
+                <div id="mapcontrols">
+                    <input type="radio" id="navigate" name="mapcontrol-button" value="none" checked="checked" />
+                    <label for="navigate">Navigate</label>
+                    <input type="radio" id="identify" name="mapcontrol-button" value="identify" />
+                    <label for="identify">Identify</label>
+                </div>
+                <div id="toolbar-text-output" class="alignright textright">
+                    <span id="toolbar-area"></span>
+                    <span id="toolbar-length"></span>
+                    <br />
+                    <span id="toolbar-coords"></span>
+                </div>
+            </div>
+
+            <!-- Map -->
+            <div id="map" class="ui-corner-all"></div>
+        </div>
+
+
         <!-- Sidebar -->
         <aside>
 
@@ -203,28 +228,7 @@
 
         </aside>
 
-        <!-- Map area -->
-        <div id="map-container">
 
-            <!-- Toolbar area -->
-            <div id="toolbar" class="screen-only hidden">
-                <div id="mapcontrols">
-                    <input type="radio" id="navigate" name="mapcontrol-button" value="none" checked="checked" />
-                    <label for="navigate">Navigate</label>
-                    <input type="radio" id="identify" name="mapcontrol-button" value="identify" />
-                    <label for="identify">Identify</label>
-                </div>
-                <div id="toolbar-text-output" class="alignright textright">
-                    <span id="toolbar-area"></span>
-                    <span id="toolbar-length"></span>
-                    <br />
-                    <span id="toolbar-coords"></span>
-                </div>
-            </div>
-
-            <!-- Map -->
-            <div id="map" class="ui-corner-all"></div>
-        </div>
 
     </div> <!-- end of #container -->
 

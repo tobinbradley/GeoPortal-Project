@@ -30,7 +30,7 @@ function initializeMap() {
     /* Add marker on locationfound event */
     map.on('locationfound', function(e){
         var radius = e.accuracy / 2;
-        $.publish("/layers/addmarker", [ e.latlng.lng, e.latlng.lat, 1, "<h5>GeoLocation</h5>You are within " + radius + " meters of this point." ]);
+        $.publish("/layers/addmarker", [ { "lon": e.latlng.lng, "lat": e.latlng.lat, "featuretype": 1, "label": "<h5>GeoLocation</h5>You are within " + radius + " meters of this point.", "zoom": 17 } ]);
     });
 
     /*  Add Layers  */
@@ -133,7 +133,7 @@ function selectByCoordinate(lon, lat) {
                 if (data.total_rows > 0 ) {
                     message = "<h5>Identfy</h5>" + data.rows[0].row.address + "<br />PID: " + data.rows[0].row.parcel_id;
                     message += "<br /><br /><strong><a href='javascript:void(0)' class='identify_select' data-matid='" + data.rows[0].row.objectid + "' onclick='locationFinder(\"Address\", \"master_address_table\", \"objectid\", " + data.rows[0].row.objectid + ");'>Select this Location</a></strong>";
-                    $.publish("/layers/addmarker", [ data.rows[0].row.longitude, data.rows[0].row.latitude, 1, message ]);
+                    $.publish("/layers/addmarker", [ { "lon": data.rows[0].row.longitude, "lat": data.rows[0].row.latitude, "featuretype": "1", "label": message } ]);
                 }
             });
         }
@@ -150,11 +150,10 @@ function toolbar(tool) {
 
 /*
     Zoom to a latlong at a particular zoom level.
-    Note default zoom level if none is passed.
+    If no zoom passed zoom level doesn't change, it just pans.
 */
-function zoomToLonLat (lon, lat, zoom) {
-    var theZoom = zoom || 17;
-    map.setView(new L.LatLng(parseFloat(lat), parseFloat(lon)), theZoom);
+function zoomToLonLat (data) {
+    if (data.zoom) map.setView(new L.LatLng(parseFloat(data.lat), parseFloat(data.lon)), data.zoom);
 }
 
 
@@ -163,16 +162,15 @@ function zoomToLonLat (lon, lat, zoom) {
     The default rule here is 1 marker of each type at a time, but you could fiddle with that.
     You can add custom markers for each type.
 */
-function addMarker(lon, lat, featuretype, label) {
-    if (featuretype === 0) zoomToLonLat(lon, lat, 17);
+function addMarker(data) {
 
     var blueIcon = L.Icon.extend({ iconUrl: './img/marker.png', shadowUrl: './img/marker-shadow.png' });
     var orangeIcon = L.Icon.extend( { iconUrl: './img/marker2.png', shadowUrl: './img/marker-shadow.png' });
     var icons = [ new blueIcon(), new orangeIcon() ];
 
-    if (null != markers[featuretype]) map.removeLayer(markers[featuretype]);
-    markers[featuretype] = new L.Marker(new L.LatLng(parseFloat(lat), parseFloat(lon)), { icon: icons[featuretype] });
-    map.addLayer(markers[featuretype]);
+    if (null != markers[data.featuretype]) map.removeLayer(markers[data.featuretype]);
+    markers[data.featuretype] = new L.Marker(new L.LatLng(parseFloat(data.lat), parseFloat(data.lon)), { icon: icons[data.featuretype] });
+    map.addLayer(markers[data.featuretype]);
 
-    markers[featuretype].bindPopup(label).openPopup();
+    markers[data.featuretype].bindPopup(data.label).openPopup();
 }

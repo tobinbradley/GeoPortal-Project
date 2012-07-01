@@ -38,11 +38,11 @@ $(document).ready(function() {
     $("#searchinput").click(function() { $(this).select(); });
     $(".selectedLocation").on("click", "a", function() {
         args = $(this).data("panzoom").split(',');
-        $.publish("/map/panzoom", [ args[0], args[1], args[2] ]);
+        $.publish("/map/panzoom", [ { "lon": args[0], "lat": args[1], "zoom": args[2] } ]);
     });
     $(".datatable").on("click", "a.locate", function() {
         coords = $(this).data("coords").split(",");
-        $.publish("/layers/addmarker", [ coords[0], coords[1], 1, $(this).data("label") ]);
+        $.publish("/layers/addmarker", [ { "lon": coords[0], "lat": coords[1], "featuretype": 1, "label": $(this).data("label"), "zoom": map.getZoom() } ]);
     });
 
     //  Map toolbar
@@ -71,9 +71,12 @@ $(document).ready(function() {
     $.subscribe("/change/selected", setSelectedAddress);  // Selected record change
     $.subscribe("/change/selected", setLocationText);  // Selected record change
     $.subscribe("/change/selected", accordionDataClearShow);  // Selected record change
+    $.subscribe("/change/selected", addMarker);  // Add Marker
+    $.subscribe("/change/selected", zoomToLonLat);  // Add Marker
     $.subscribe("/change/accordion", processAccordionDataChange);  // Change accordion
     $.subscribe("/layers/addmarker", addMarker);  // Add marker
-    $.subscribe("/map/panzoom", zoomToLonLat);  // Zoom to location and zoom
+    $.subscribe("/layers/addmarker", zoomToLonLat);  // Zoom to location
+    $.subscribe("/map/panzoom", zoomToLonLat);  // Zoom to location
 
 
     // jQuery UI Autocomplete
@@ -169,18 +172,8 @@ $(window).load(function() {
     // Initialize Map
     initializeMap();
 
-    // Detect HASH arguments
-    if (window.location.hash.length > 1) {
-       theHash = window.location.hash.split("/");
-        // Process the matid
-        if (theHash[1] && theHash[1].length > 0 && theHash[1] != selectedAddress.objectid) {
-            locationFinder("Address", 'master_address_table', 'objectid', theHash[1]);
-        }
-        // Process the data tab
-        if (theHash[2] && $( "#" + theHash[2] ).length > 0 && $("#accordion-data h3").eq($( "#accordion-data" ).accordion( "option", "active" )).attr("id") != theHash[2]) {
-            $('#accordion-data').accordion('activate', '#' + theHash[2]);
-        }
-    }
+    // Process the hash
+    $(window).hashchange();
 
 });
 
@@ -247,22 +240,22 @@ function processAccordionDataChange(accordionValue) {
 
 
 /*  Set selected address  */
-function setSelectedAddress(record) {
+function setSelectedAddress(data) {
     selectedAddress = {
-        "objectid": record.objectid,
-        "x_coordinate": record.x_coordinate,
-        "y_coordinate": record.y_coordinate,
-        "parcelid": record.parcel_id,
-        "address": record.address,
-        "postal_city": record.postal_city,
-        "lon": record.longitude,
-        "lat": record.latitude
+        "objectid": data.objectid,
+        "x_coordinate": data.x_coordinate,
+        "y_coordinate": data.y_coordinate,
+        "parcelid": data.parcel_id,
+        "address": data.address,
+        "postal_city": data.postal_city,
+        "lon": data.longitude,
+        "lat": data.latitude
     };
 }
 
 /*  update selected location text  */
-function setLocationText(record) {
-    $('.selectedLocation').html('<strong><a href="javascript:void(0)" data-panzoom="' + record.longitude + ', ' + record.latitude + ', 17" > ' + record.address + '</a></strong>');
+function setLocationText(data) {
+    $('.selectedLocation').html('<strong><a href="javascript:void(0)" data-panzoom="' + data.longitude + ', ' + data.latitude + ', 17" > ' + data.address + '</a></strong>');
 }
 
 /*  clear data areas and make them visible  */
@@ -285,9 +278,14 @@ function locationFinder(findType, findTable, findField, findID, findValue) {
             url = config.web_service_base + 'v1/ws_mat_addressnum.php?format=json&callback=?&jsonp=?&addressnum=' + findID;
             $.getJSON(url, function(data) {
                 if (data.total_rows > 0) {
+                    // Add some properties for addmarker
+                    data.rows[0].row.lon = data.rows[0].row.longitude;
+                    data.rows[0].row.lat = data.rows[0].row.latitude;
+                    data.rows[0].row.featuretype = 0;
+                    data.rows[0].row.label = data.rows[0].row.address;
+                    data.rows[0].row.zoom = 17;
                     $.publish("/change/selected", [ data.rows[0].row ]);
                     $.publish("/change/hash");
-                    $.publish("/layers/addmarker", [ data.rows[0].row.longitude, data.rows[0].row.latitude, 0, "<h5>Selected Property</h5>" + data.rows[0].row.address ]);
                     $.publish("/change/accordion", [ $("#accordion-data h3").eq($('#accordion-data').accordion('option', 'active')).attr("id") ]);
                 }
             });
@@ -304,13 +302,13 @@ function locationFinder(findType, findTable, findField, findID, findValue) {
             };
             url = config.web_service_base + "v1/ws_geo_attributequery.php?format=json&geotable=" + findTable + "&parameters=" + urlencode(findField + " = " + findID) + "&fields=" + urlencode(poiFields[findTable]) + '&callback=?';
             $.getJSON(url, function(data) {
-                $.publish("/layers/addmarker", [ data.rows[0].row.lon, data.rows[0].row.lat, 1, data.rows[0].row.label ]);
+                $.publish("/layers/addmarker", [ { "lon": data.rows[0].row.lon, "lat": data.rows[0].row.lat, "featuretype": 1, "label": data.rows[0].row.label, "zoom": 16 } ]);
             });
             break;
         case "Road":
             url = config.web_service_base + "v1/ws_geo_getcentroid.php?format=json&geotable=" + findTable + "&parameters=streetname='" + findValue + "' order by ll_add limit 1&forceonsurface=true&srid=4326&callback=?";
             $.getJSON(url, function(data) {
-                $.publish("/layers/addmarker", [ data.rows[0].row.x, data.rows[0].row.y, 1, "<h5>Road</h5>" + findValue ]);
+                $.publish("/layers/addmarker", [ { "lon": data.rows[0].row.x, "lat": data.rows[0].row.y, "featuretype": 1, "label": "<h5>Road</h5>" + findValue, "zoom": 16 } ]);
             });
 
             break;
@@ -320,7 +318,7 @@ function locationFinder(findType, findTable, findField, findID, findValue) {
             args = "&srid=4326&streetname1=" + urlencode(jQuery.trim(streetnameArray[0])) + "&streetname2=" + urlencode(jQuery.trim(streetnameArray[1]));
             $.getJSON(url + args, function(data) {
                 if (data.total_rows > 0 ) {
-                    $.publish("/layers/addmarker", [ data.rows[0].row.xcoord, data.rows[0].row.ycoord, 1, "<h5>Intersection</h5>" + findID ]);
+                    $.publish("/layers/addmarker", [ { "lon": data.rows[0].row.xcoord, "lat": data.rows[0].row.ycoord, "featuretype": 1, "label": "<h5>Intersection</h5>" + findID, "zoom": 15 } ]);
                 }
             });
             break;

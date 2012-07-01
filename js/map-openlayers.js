@@ -58,7 +58,7 @@ function initializeMap(){
             navigator.geolocation.getCurrentPosition(
                 function(position) {
                     var radius = position.coords.accuracy / 2;
-                    $.publish("/layers/addmarker", [ position.coords.longitude, position.coords.latitude, 1, "<h5>GeoLocation</h5>You are within " + radius + " meters of this point." ]);
+                    $.publish("/layers/addmarker", [ { "lon": position.coords.longitude, "lat": position.coords.latitude, "featuretype": 1, "label": "<h5>GeoLocation</h5>You are within " + radius + " meters of this point.", "zoom": 16 } ]);
                 },
                 function() { /* error handler */ },
                 {enableHighAccuracy:true, maximumAge:30000, timeout:27000}
@@ -163,7 +163,7 @@ function selectByCoordinate(lon, lat) {
                 if (data.total_rows > 0 ) {
                     message = "<h5>Identfy</h5>" + data.rows[0].row.address + "<br />PID: " + data.rows[0].row.parcel_id;
                     message += "<br /><br /><strong><a href='javascript:void(0)' class='identify_select' data-matid='" + data.rows[0].row.objectid + "' onclick='locationFinder(\"Address\", \"master_address_table\", \"objectid\", " + data.rows[0].row.objectid + ");'>Select this Location</a></strong>";
-                    $.publish("/layers/addmarker", [ data.rows[0].row.longitude, data.rows[0].row.latitude, 1, message ]);
+                    $.publish("/layers/addmarker", [ { "lon": data.rows[0].row.longitude, "lat": data.rows[0].row.latitude, "featuretype": 1, "label": message } ]);
                 }
             });
         }
@@ -174,11 +174,13 @@ function selectByCoordinate(lon, lat) {
     Zoom to a latlong at a particular zoom level.
     Note default zoom level if none is passed.
 */
-function zoomToLonLat (lon, lat, zoom) {
-    zoom = zoom || 17;
-    point = new OpenLayers.Geometry.Point(lon, lat);
-    OpenLayers.Projection.transform(point, map.displayProjection, map.getProjectionObject());
-    map.setCenter(new OpenLayers.LonLat(point.x, point.y), zoom);
+function zoomToLonLat (data) {
+    if (data.zoom) {
+        zoom = data.zoom || 17;
+        point = new OpenLayers.Geometry.Point(data.lon, data.lat);
+        OpenLayers.Projection.transform(point, map.displayProjection, map.getProjectionObject());
+        map.setCenter(new OpenLayers.LonLat(point.x, point.y), zoom);
+    }
 }
 
 
@@ -217,19 +219,18 @@ function onFeatureUnselect(feature) {
     The default rule here is 1 marker of each type at a time, but you could fiddle with that.
     You can add custom markers for each type.
 */
-function addMarker(lon, lat, featuretype, label) {
-    if (featuretype === 0) zoomToLonLat (lon, lat, 17);
+function addMarker(data) {
 
     // remove old features of same type
     var markerLayer = getLayerOpenLayers("Map Markers");
     feats = markerLayer.features;
     for(i = 0; i < feats.length; i++) {
-        if (feats[i].attributes.type == featuretype) markerLayer.removeFeatures(feats[i]);
+        if (feats[i].attributes.type == data.featuretype) markerLayer.removeFeatures(feats[i]);
     }
     // Add new feature
-    point = new OpenLayers.Geometry.Point(lon, lat);
+    point = new OpenLayers.Geometry.Point(data.lon, data.lat);
     OpenLayers.Projection.transform(point, map.displayProjection, map.getProjectionObject());
-    feature = new OpenLayers.Feature.Vector(point, {type: featuretype, label: label} );
+    feature = new OpenLayers.Feature.Vector(point, {type: data.featuretype, label: data.label} );
     markerLayer.addFeatures(feature);
     selectControl.select(feature);
 }

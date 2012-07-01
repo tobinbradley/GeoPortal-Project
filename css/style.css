@@ -469,6 +469,7 @@ input::-moz-placeholder, textarea::-moz-placeholder { color: #7C7C7C; }
 
   /* map */
   .gmnoprint {display: none; width: 0; height: 0; }
+  .leaflet-top .leaflet-control { display: none; }
 
   /* jQuery Tweaks */
   .accordion h3, .ui-tabs-nav {display: none !important;}

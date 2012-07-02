@@ -71,11 +71,11 @@ $(document).ready(function() {
     $.subscribe("/change/selected", setSelectedAddress);  // Selected record change
     $.subscribe("/change/selected", setLocationText);  // Selected record change
     $.subscribe("/change/selected", accordionDataClearShow);  // Selected record change
+    $.subscribe("/change/selected", zoomToLonLat);  // Zoom to Location
     $.subscribe("/change/selected", addMarker);  // Add Marker
-    $.subscribe("/change/selected", zoomToLonLat);  // Add Marker
     $.subscribe("/change/accordion", processAccordionDataChange);  // Change accordion
-    $.subscribe("/layers/addmarker", addMarker);  // Add marker
     $.subscribe("/layers/addmarker", zoomToLonLat);  // Zoom to location
+    $.subscribe("/layers/addmarker", addMarker);  // Add marker
     $.subscribe("/map/panzoom", zoomToLonLat);  // Zoom to location
 
 
@@ -227,7 +227,7 @@ function processAccordionDataChange(accordionValue) {
                         $("#park-and-rides table tbody").tableGenerator({'fields': ['item.row.name','item.row.address','item.row.routes'], 'data': data});
                     });
                     // CATS Light Rail Stops
-                    url = pointBuffer(selectedAddress.x_coordinate, selectedAddress.y_coordinate, 2264, 'cats_light_rail_stations', "name,'N/A' as address, x(transform(the_geom, 4326)) as lon, y(transform(the_geom, 4326)) as lat", '', 126400, "", "3", 'json', '?');
+                    url = pointBuffer(selectedAddress.x_coordinate, selectedAddress.y_coordinate, 2264, 'cats_light_rail_stations', "name,'' as address, x(transform(the_geom, 4326)) as lon, y(transform(the_geom, 4326)) as lat", '', 126400, "", "3", 'json', '?');
                     $.getJSON(url, function(data) {
                         $("#light-rail-stops table tbody").tableGenerator({'fields': ['item.row.name'], 'data': data});
                     });

@@ -41,7 +41,7 @@ window.log = function(){
                     //Check to see if it's a table that includes locate/routing functions
                     if (item.row.lon) {
                         routeurl = googleRoute(selectedAddress.address + ' NC', item.row.lat + ',' + item.row.lon );
-                        writebuffer += "<td class='" + settings.colClass + "'><a href='javascript:void(0);' title='Locate on the map.' data-coords='" + item.row.lon + "," + item.row.lat + "' data-label='<h5>" + item.row.name + "</h5>" + item.row.address + "' class='locate'><img src='img/find.gif' style='margin: 0px' /></a></td>";
+                        writebuffer += "<td class='" + settings.colClass + "'><a href='javascript:void(0);' title='Locate on the map.' data-coords='" + item.row.lon + "," + item.row.lat + "' data-label='<h5>" + item.row.name.escapeQuotes() + "</h5>" + item.row.address.escapeQuotes() + "' class='locate'><img src='img/find.gif' style='margin: 0px' /></a></td>";
                         writebuffer += "<td class='" + settings.colClass + "'><a href='" + routeurl + "' target='_blank' title='Get driving directions.'><img src='img/car.png' style='margin: 0px' /></a></td>";
                     }
                     for (i = 0; i < settings.fields.length; i++) {
@@ -156,8 +156,6 @@ function urldecode(str) {
 }
 
 
-
-
 /*  Prototype for string trimming  */
 String.prototype.trim = function() {
     return this.replace(/^\s+|\s+$/g,"");
@@ -173,6 +171,13 @@ Number.prototype.formatNumber = function(c, h, t, d) {
     var n = this, c = isNaN(c = Math.abs(c)) ? 2 : c, h = h === undefined ? "" : h, d = d === undefined ? "." : d, t = t === undefined ? "," : t, s = n < 0 ? "-" : "", i = parseInt(n = Math.abs(+n || 0).toFixed(c), 10) + "", j = (j = i.length) > 3 ? j % 3 : 0;
     return h + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
 };
+/*  Escape special characters in strings  */
+String.prototype.escapeQuotes = function () {
+    if (this === null) return null;
+    return this.replace(/'/g, "&#39;")
+        .replace(/"/g, "&quot;");
+};
+
 
 /*  Create URL to Google Maps for routing  */
 function googleRoute (fromAddress, toAddress) {
@@ -181,6 +186,7 @@ function googleRoute (fromAddress, toAddress) {
     url += "&daddr=" + urlencode(toAddress);
     return url;
 }
+
 
 /**
  * Web service handler for point buffer operation

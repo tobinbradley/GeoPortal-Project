@@ -235,6 +235,7 @@ a:hover { text-decoration: underline; }
 
 
 /* layout */
+#container { overflow: hidden; }
 header { padding: 5px; overflow: hidden; height: 65px; position: relative; z-index: 1; }
 aside {
   padding: 0 5px;

@@ -16,7 +16,7 @@ window.log = function(){
     @author Tobin Bradley
 */
 (function($) {
-    $.fn.tableGenerator = function( options ) {
+    $.fn.tableGenerator = function(options) {
 
         // plugin's default options
         var settings = {
@@ -28,21 +28,21 @@ window.log = function(){
         };
 
         return this.each(function() {
-            if ( options ) {
-                $.extend( settings, options );
+            if (options) {
+                $.extend(settings, options);
             }
             writebuffer = "";
             // Write Title
             if (settings.data.total_rows > 0) {
 
                 // Process JSON
-                $.each(settings.data.rows, function(j, item){
+                $.each(settings.data.rows, function(j, item) {
                     writebuffer += '<tr>';
                     //Check to see if it's a table that includes locate/routing functions
                     if (item.row.lon) {
-                        routeurl = googleRoute(selectedAddress.address + ' NC', item.row.lat + ',' + item.row.lon );
-                        writebuffer += "<td class='" + settings.colClass + "'><a href='javascript:void(0);' title='Locate on the map.' data-coords='" + item.row.lon + "," + item.row.lat + "' data-label='<h5>" + item.row.name.escapeQuotes() + "</h5>" + item.row.address.escapeQuotes() + "' class='locate'><img src='img/find.gif' style='margin: 0px' /></a></td>";
-                        writebuffer += "<td class='" + settings.colClass + "'><a href='" + routeurl + "' target='_blank' title='Get driving directions.'><img src='img/car.png' style='margin: 0px' /></a></td>";
+                        routeurl = googleRoute(selectedAddress.address + ' NC', item.row.lat + ',' + item.row.lon);
+                        writebuffer += "<td class='table-icon " + settings.colClass + "'><a href='javascript:void(0);' title='Locate on the map.' data-coords='" + item.row.lon + "," + item.row.lat + "' data-label='<h5>" + item.row.name.escapeQuotes() + "</h5>" + item.row.address.escapeQuotes() + "' class='locate'><img src='img/locate.gif' style='margin: 0px' /></a></td>";
+                        writebuffer += "<td class='table-icon " + settings.colClass + "'><a href='" + routeurl + "' target='_blank' title='Get driving directions.'><img src='img/route.png' style='margin: 0px' /></a></td>";
                     }
                     for (i = 0; i < settings.fields.length; i++) {
                         writebuffer += '<td class="' + settings.colClass + '">' + eval(settings.fields[i]) + '</td>';
@@ -53,8 +53,7 @@ window.log = function(){
                 // Populate table
                 $(this).append(writebuffer);
 
-            }
-            else {
+            } else {
                 // No records found
                 $(this).append('<tr><td class="' + settings.colClass + '" colspan="' + settings.fields.length + '>' + settings.nodataString + '</td></tr>');
             }
@@ -82,39 +81,40 @@ window.log = function(){
     Modified by Tobin Bradley
     AFL/BSD Licensed
 */
-;(function(d){
+;
+(function(d) {
     // the topic/subscription hash
     var cache = {};
     // Publish some data on a named topic.
-    d.publish = function(/* String */topic, /* Array? */args){
-        cache[topic] && d.each(cache[topic], function(){
+    d.publish = function( /* String */ topic, /* Array? */ args) {
+        cache[topic] && d.each(cache[topic], function() {
             try {
                 this.apply(d, args || []);
-            } catch(err) {
+            } catch (err) {
                 console.log(err);
             }
         });
     };
     // Register a callback on a named topic.
-    d.subscribe = function(/* String */topic, /* Function */callback){
-        if(!cache[topic]){
+    d.subscribe = function( /* String */ topic, /* Function */ callback) {
+        if (!cache[topic]) {
             cache[topic] = [];
         }
         cache[topic].push(callback);
         return [topic, callback]; // Array
     };
     // Disconnect a subscribed function for a topic.
-    d.unsubscribe = function(/* String */topic, /* Function */callback){
-        cache[topic] && d.each(cache[topic], function(idx){
-            if(this == callback){
+    d.unsubscribe = function( /* String */ topic, /* Function */ callback) {
+        cache[topic] && d.each(cache[topic], function(idx) {
+            if (this == callback) {
                 cache[topic].splice(idx, 1);
             }
         });
     };
     // List Subscribers
-    d.subscribers = function(/* String */topic) {
+    d.subscribers = function( /* String */ topic) {
         l = [];
-        cache[topic] && d.each(cache[topic], function(idx){
+        cache[topic] && d.each(cache[topic], function(idx) {
             l.push(this.name);
         });
         return l;
@@ -126,14 +126,13 @@ window.log = function(){
     Add left and right labels to a jQuery UI Slider
 */
 $.fn.extend({
-    sliderLabels: function(left,right) {
+    sliderLabels: function(left, right) {
         var $this = $(this);
-        var $sliderdiv= $this;
-        $sliderdiv
-        .css({'font-weight': 'normal'});
-        $sliderdiv
-        .prepend('<span class="ui-slider-inner-label"  style="position: absolute; left:0px; top:15px;">'+left+ '</span>')
-        .append('<span class="ui-slider-inner-label" style="position: absolute; right:0px; top:15px;">'+right+ '</span>');
+        var $sliderdiv = $this;
+        $sliderdiv.css({
+            'font-weight': 'normal'
+        });
+        $sliderdiv.prepend('<span class="ui-slider-inner-label"  style="position: absolute; left:0px; top:15px;">' + left + '</span>').append('<span class="ui-slider-inner-label" style="position: absolute; right:0px; top:15px;">' + right + '</span>');
     }
 });
 
@@ -149,6 +148,7 @@ function urlencode(str) {
     str = str.replace('@', '%40');
     return str;
 }
+
 function urldecode(str) {
     str = str.replace('+', ' ');
     str = unescape(str);
@@ -158,7 +158,7 @@ function urldecode(str) {
 
 /*  Prototype for string trimming  */
 String.prototype.trim = function() {
-    return this.replace(/^\s+|\s+$/g,"");
+    return this.replace(/^\s+|\s+$/g, "");
 };
 /*
     Prototype for formatting numbers
@@ -168,19 +168,25 @@ String.prototype.trim = function() {
     d: decimal character, default '.'
 */
 Number.prototype.formatNumber = function(c, h, t, d) {
-    var n = this, c = isNaN(c = Math.abs(c)) ? 2 : c, h = h === undefined ? "" : h, d = d === undefined ? "." : d, t = t === undefined ? "," : t, s = n < 0 ? "-" : "", i = parseInt(n = Math.abs(+n || 0).toFixed(c), 10) + "", j = (j = i.length) > 3 ? j % 3 : 0;
+    var n = this,
+        c = isNaN(c = Math.abs(c)) ? 2 : c,
+        h = h === undefined ? "" : h,
+        d = d === undefined ? "." : d,
+        t = t === undefined ? "," : t,
+        s = n < 0 ? "-" : "",
+        i = parseInt(n = Math.abs(+n || 0).toFixed(c), 10) + "",
+        j = (j = i.length) > 3 ? j % 3 : 0;
     return h + (j ? i.substr(0, j) + t : "") + i.substr(j).replace(/(\d{3})(?=\d)/g, "$1" + t) + (c ? d + Math.abs(n - i).toFixed(c).slice(2) : "");
-};
-/*  Escape special characters in strings  */
-String.prototype.escapeQuotes = function () {
+}; /*  Escape special characters in strings  */
+String.prototype.escapeQuotes = function() {
     if (this === null) return null;
-    return this.replace(/'/g, "&#39;")
-        .replace(/"/g, "&quot;");
+    return this.replace(/'/g, "&#39;").replace(/"/g, "&quot;");
 };
 
 
 /*  Create URL to Google Maps for routing  */
-function googleRoute (fromAddress, toAddress) {
+
+function googleRoute(fromAddress, toAddress) {
     url = "http://maps.google.com/maps?hl=en";
     url += "&saddr=" + urlencode(fromAddress);
     url += "&daddr=" + urlencode(toAddress);
@@ -200,7 +206,8 @@ function googleRoute (fromAddress, toAddress) {
  * @param {string} format
  * @param {string} jsonp_callback
  */
-function pointBuffer (x, y, srid, geotable, fields, parameters, distance, order, limit, format, jsonp_callback) {
+
+function pointBuffer(x, y, srid, geotable, fields, parameters, distance, order, limit, format, jsonp_callback) {
     url = config.web_service_base;
     url += "v2/ws_geo_bufferpoint.php";
     url += "?x=" + x;
@@ -228,7 +235,8 @@ function pointBuffer (x, y, srid, geotable, fields, parameters, distance, order,
  * @param {string} format
  * @param {string} jsonp_callback
  */
-function pointOverlay (x, y, srid, geotable, fields, parameters, format, jsonp_callback) {
+
+function pointOverlay(x, y, srid, geotable, fields, parameters, format, jsonp_callback) {
     url = config.web_service_base;
     url += "v1/ws_geo_pointoverlay.php";
     url += "?x=" + x;

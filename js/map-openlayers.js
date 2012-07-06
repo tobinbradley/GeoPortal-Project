@@ -6,11 +6,10 @@
 
 
 /*  Globals specifically for OpenLayers Use  */
-var selectControl;  // OpenLayers select control for vector marker layer
-
+var selectControl; // OpenLayers select control for vector marker layer
 /*  Map Initialization  */
-function initializeMap(){
-    /*  initialze map  */
+
+function initializeMap() { /*  initialze map  */
     map = new OpenLayers.Map({
         div: "map",
         projection: "EPSG:900913",
@@ -24,9 +23,7 @@ function initializeMap(){
 
     /*  Set map center and zoom  */
     map.setCenter(new OpenLayers.LonLat(config.default_map_center[1], config.default_map_center[0]).transform(
-        new OpenLayers.Projection("EPSG:4326"),
-        map.getProjectionObject()
-        ), config.default_map_zoom);
+    new OpenLayers.Projection("EPSG:4326"), map.getProjectionObject()), config.default_map_zoom);
 
     // Vector marker layer
     var styleMap = new OpenLayers.StyleMap({
@@ -34,20 +31,46 @@ function initializeMap(){
         pointRadius: 18
     });
     var lookup = {
-        0: {externalGraphic: "img/marker.png", graphicWidth: 25, graphicHeight: 41, backgroundGraphic: "img/marker-shadow.png", graphicYOffset: -40, backgroundWidth: 41, backgroundHeight: 41, backgroundXOffset: -12, backgroundYOffset: -40 },
-        1: {externalGraphic: "img/marker2.png", graphicWidth: 25, graphicHeight: 41, backgroundGraphic: "img/marker-shadow.png", graphicYOffset: -40, backgroundWidth: 41, backgroundHeight: 41, backgroundXOffset: -12, backgroundYOffset: -40 }
+        0: {
+            externalGraphic: "img/marker.png",
+            graphicWidth: 25,
+            graphicHeight: 41,
+            backgroundGraphic: "img/marker-shadow.png",
+            graphicYOffset: -40,
+            backgroundWidth: 41,
+            backgroundHeight: 41,
+            backgroundXOffset: -12,
+            backgroundYOffset: -40
+        },
+        1: {
+            externalGraphic: "img/marker2.png",
+            graphicWidth: 25,
+            graphicHeight: 41,
+            backgroundGraphic: "img/marker-shadow.png",
+            graphicYOffset: -40,
+            backgroundWidth: 41,
+            backgroundHeight: 41,
+            backgroundXOffset: -12,
+            backgroundYOffset: -40
+        }
     };
     styleMap.addUniqueValueRules("default", "type", lookup);
     var markerLayer = new OpenLayers.Layer.Vector('Map Markers', {
-        styleMap: styleMap, displayInLayerSwitcher: false
+        styleMap: styleMap,
+        displayInLayerSwitcher: false
     });
     map.addLayer(markerLayer);
 
     // Map Controls
-    map.addControl(new OpenLayers.Control.MousePosition({'div': OpenLayers.Util.getElement('toolbar-coords')}));
+    map.addControl(new OpenLayers.Control.MousePosition({
+        'div': OpenLayers.Util.getElement('toolbar-coords')
+    }));
     map.addControl(new OpenLayers.Control.LayerSwitcher());
-    selectControl = new OpenLayers.Control.SelectFeature(markerLayer,
-        {onSelect: onFeatureSelect, onUnselect: onFeatureUnselect, stopSingle: true});
+    selectControl = new OpenLayers.Control.SelectFeature(markerLayer, {
+        onSelect: onFeatureSelect,
+        onUnselect: onFeatureUnselect,
+        stopSingle: true
+    });
     map.addControl(selectControl);
     selectControl.activate();
 
@@ -56,13 +79,22 @@ function initializeMap(){
         $("#gpsarea").show();
         $("#gps").click(function() {
             navigator.geolocation.getCurrentPosition(
-                function(position) {
-                    var radius = position.coords.accuracy / 2;
-                    $.publish("/layers/addmarker", [ { "lon": position.coords.longitude, "lat": position.coords.latitude, "featuretype": 1, "label": "<h5>GeoLocation</h5>You are within " + radius + " meters of this point.", "zoom": 16 } ]);
-                },
-                function() { /* error handler */ },
-                {enableHighAccuracy:true, maximumAge:30000, timeout:27000}
-            );
+
+            function(position) {
+                var radius = position.coords.accuracy / 2;
+                $.publish("/layers/addmarker", [{
+                    "lon": position.coords.longitude,
+                    "lat": position.coords.latitude,
+                    "featuretype": 1,
+                    "label": "<h5>GeoLocation</h5>You are within " + radius + " meters of this point.",
+                    "zoom": 16
+                }]);
+            }, function() { /* error handler */
+            }, {
+                enableHighAccuracy: true,
+                maximumAge: 30000,
+                timeout: 27000
+            });
         });
     }
 
@@ -70,15 +102,22 @@ function initializeMap(){
     $.each(config.overlay_map_layers, function(key, val) {
         $('#opacitydll').append('<option>' + val.name + '</option>');
     });
-    $('#opacitySlider').slider({range: "min", min: 0.1, max: 1, step: 0.05, value: 0.50, stop: function(event, ui) {
-        theLayer = getLayerOpenLayers($('#opacitydll').val());
-        if (theLayer) theLayer.setOpacity(ui.value);
-    }});
+    $('#opacitySlider').slider({
+        range: "min",
+        min: 0.1,
+        max: 1,
+        step: 0.05,
+        value: 0.50,
+        stop: function(event, ui) {
+            theLayer = getLayerOpenLayers($('#opacitydll').val());
+            if (theLayer) theLayer.setOpacity(ui.value);
+        }
+    });
     $('#opacitydll').change(function() {
         theLayer = getLayerOpenLayers($('#opacitydll').val());
-        if (theLayer) $("#opacitySlider").slider( "option", "value", theLayer.opacity );
+        if (theLayer) $("#opacitySlider").slider("option", "value", theLayer.opacity);
     });
-    $('#opacitySlider').sliderLabels('MAP','DATA');
+    $('#opacitySlider').sliderLabels('MAP', 'DATA');
 }
 
 
@@ -93,31 +132,26 @@ function addMapLayers(layersArray) {
         var layer;
         if (value.wmsurl.indexOf("{x}") != -1) {
             if (value.id == "osm") {
-                layer = new OpenLayers.Layer.OSM( "OpenStreetMap");
+                layer = new OpenLayers.Layer.OSM("OpenStreetMap");
+            } else {
+                layer = new OpenLayers.Layer.XYZ(value.name, value.wmsurl);
             }
-            else {
-                layer = new OpenLayers.Layer.XYZ ( value.name, value.wmsurl );
-            }
-        }
-        else {
+        } else {
             layer = new OpenLayers.Layer.WMS(
-                value.name,
-                value.wmsurl,
-                {
-                    layers: value.layers,
-                    format: value.format,
-                    transparent: value.transparent
-                },{
-                    isBaseLayer: value.isBaseLayer,
-                    opacity: value.opacity,
-                    visibility: value.isVisible,
-                    minZoomLevel: value.minZoom,
-                    maxZoomLevel: value.maxZoom,
-                    attribution: value.attribution,
-                    projection: value.projection
+            value.name, value.wmsurl, {
+                layers: value.layers,
+                format: value.format,
+                transparent: value.transparent
+            }, {
+                isBaseLayer: value.isBaseLayer,
+                opacity: value.opacity,
+                visibility: value.isVisible,
+                minZoomLevel: value.minZoom,
+                maxZoomLevel: value.maxZoom,
+                attribution: value.attribution,
+                projection: value.projection
 
-                }
-            );
+            });
         }
         map.addLayer(layer);
     });
@@ -125,16 +159,18 @@ function addMapLayers(layersArray) {
 
 
 /*  Handle toolbar events  */
+
 function toolbar(tool) {
-    if (tool.attr("id") == "identify") map.events.register("click", map , identify);
+    if (tool.attr("id") == "identify") map.events.register("click", map, identify);
     else map.events.unregister('click', map, identify);
 }
 
 /*  Get map layer from leaflet  */
+
 function getLayerOpenLayers(layerName) {
     var theLayer = null;
-    $.each(map.layers, function(index, val){
-        if (val.name == layerName ) theLayer = val;
+    $.each(map.layers, function(index, val) {
+        if (val.name == layerName) theLayer = val;
     });
     return theLayer;
 }
@@ -146,24 +182,30 @@ function getLayerOpenLayers(layerName) {
 function identify(event) {
     if (map.getZoom() >= 16) {
         var lonlat = map.getLonLatFromViewPortPx(event.xy);
-        lonlat.transform(map.getProjectionObject(), new OpenLayers.Projection("EPSG:4326") );
+        lonlat.transform(map.getProjectionObject(), new OpenLayers.Projection("EPSG:4326"));
         selectByCoordinate(lonlat.lon, lonlat.lat);
     }
 }
 
 /*  Select parcel with lon,lat  */
+
 function selectByCoordinate(lon, lat) {
     url = pointOverlay(lon, lat, 4326, 'tax_parcels', 'pid', "", 'json', '?');
-    $.getJSON(url, function(data){
-        if (data.total_rows > 0 ) {
+    $.getJSON(url, function(data) {
+        if (data.total_rows > 0) {
             url = config.web_service_base + "v1/ws_mat_pidgeocode.php?format=json&callback=?";
             args = "&pid=" + urlencode(data.rows[0].row.pid);
             url = url + args;
             $.getJSON(url, function(data) {
-                if (data.total_rows > 0 ) {
+                if (data.total_rows > 0) {
                     message = "<h5>Identfy</h5>" + data.rows[0].row.address + "<br />PID: " + data.rows[0].row.parcel_id;
                     message += "<br /><br /><strong><a href='javascript:void(0)' class='identify_select' data-matid='" + data.rows[0].row.objectid + "' onclick='locationFinder(\"Address\", \"master_address_table\", \"objectid\", " + data.rows[0].row.objectid + ");'>Select this Location</a></strong>";
-                    $.publish("/layers/addmarker", [ { "lon": data.rows[0].row.longitude, "lat": data.rows[0].row.latitude, "featuretype": 1, "label": message } ]);
+                    $.publish("/layers/addmarker", [{
+                        "lon": data.rows[0].row.longitude,
+                        "lat": data.rows[0].row.latitude,
+                        "featuretype": 1,
+                        "label": message
+                    }]);
                 }
             });
         }
@@ -174,7 +216,7 @@ function selectByCoordinate(lon, lat) {
     Zoom to a latlong at a particular zoom level.
     Note default zoom level if none is passed.
 */
-function zoomToLonLat (data) {
+function zoomToLonLat(data) {
     if (data.zoom) {
         zoom = data.zoom || 17;
         point = new OpenLayers.Geometry.Point(data.lon, data.lat);
@@ -185,28 +227,27 @@ function zoomToLonLat (data) {
 
 
 /* Marker Vector Layer Popups */
+
 function onPopupClose(evt) {
     selectControl.unselectAll();
-    OpenLayers.Event.stop(evt);  // prevent an identify from firing
+    OpenLayers.Event.stop(evt); // prevent an identify from firing
 }
+
 function onFeatureSelect(feature) {
     selectedFeature = feature;
     // remove any existing popups
-    while( map.popups.length ) {
+    while (map.popups.length) {
         map.removePopup(map.popups[0]);
     }
-    popup = new OpenLayers.Popup.FramedCloud("chicken",
-        feature.geometry.getBounds().getCenterLonLat(),
-        null,
-        feature.attributes.label,
-        null, true, onPopupClose);
+    popup = new OpenLayers.Popup.FramedCloud("chicken", feature.geometry.getBounds().getCenterLonLat(), null, feature.attributes.label, null, true, onPopupClose);
     feature.popup = popup;
-    popup.minSize = new OpenLayers.Size(200,50);
-    popup.maxSize = new OpenLayers.Size(250,200);
+    popup.minSize = new OpenLayers.Size(200, 50);
+    popup.maxSize = new OpenLayers.Size(250, 200);
     map.addPopup(popup);
 }
+
 function onFeatureUnselect(feature) {
-    if(feature.popup) {
+    if (feature.popup) {
         map.removePopup(feature.popup);
         feature.popup.destroy();
         delete feature.popup;
@@ -224,14 +265,16 @@ function addMarker(data) {
     // remove old features of same type
     var markerLayer = getLayerOpenLayers("Map Markers");
     feats = markerLayer.features;
-    for(i = 0; i < feats.length; i++) {
+    for (i = 0; i < feats.length; i++) {
         if (feats[i].attributes.type == data.featuretype) markerLayer.removeFeatures(feats[i]);
     }
     // Add new feature
     point = new OpenLayers.Geometry.Point(data.lon, data.lat);
     OpenLayers.Projection.transform(point, map.displayProjection, map.getProjectionObject());
-    feature = new OpenLayers.Feature.Vector(point, {type: data.featuretype, label: data.label} );
+    feature = new OpenLayers.Feature.Vector(point, {
+        type: data.featuretype,
+        label: data.label
+    });
     markerLayer.addFeatures(feature);
     selectControl.select(feature);
 }
-

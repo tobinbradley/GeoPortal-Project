@@ -1,5 +1,5 @@
 CACHE MANIFEST
-# v126
+# v2
 
 # Explicitly cached 'master entries'.
 CACHE:
@@ -14,19 +14,19 @@ img/marker.png
 img/marker2.png
 img/marker-shadow.png
 img/ui-anim_basic_16x16.gif
-js/config.json
+js/config.js
 js/plugins.js
 js/script.js
 js/libs/modernizr.custom.js
 
 # The following are specific to the mapping library - leaflet or openlayers
-# js/map-leaflet.js
-# js/libs/leaflet/leaflet.css
-# js/libs/leaflet/leaflet.js
-# js/libs/leaflet/images/layers.png
-# js/libs/leaflet/images/popup-close.png
-# js/libs/leaflet/images/zoom-in.png
-# js/libs/leaflet/images/zoom-out.png
+js/map-leaflet.js
+js/libs/leaflet/leaflet.css
+js/libs/leaflet/leaflet.js
+js/libs/leaflet/images/layers.png
+js/libs/leaflet/images/popup-close.png
+js/libs/leaflet/images/zoom-in.png
+js/libs/leaflet/images/zoom-out.png
 
 
 

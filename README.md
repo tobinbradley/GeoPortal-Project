@@ -9,7 +9,7 @@ GeoPortal mapping template created by Mecklenburg County GIS. It leverages the g
 * [jQuery UI](http://jqueryui.com/)
 
 ## Getting Started
-This application contains no server-side code and should run as-is on any http server without modification. It *will not* work from a file system (file://), as your browser will throw a XSS error when trying to load config.json.
+This application contains no server-side code and should run as-is on any http server without modification.
 
 ### Choosing a Mapping Library
 The GeoPortal Project is designed to use either the [Leaflet](http://leaflet.cloudmade.com/) or [OpenLayers](http://openlayers.org/) mapping libraries. Leaflet is selected by default. Both libraries are fantastic and capable mapping libraries and you can't go wrong with either one. Leaflet is much smaller and is arguably easier to use. OpenLayers is a much more powerful and robust library but is significatly larger and is arguably more difficult to use.
@@ -21,8 +21,8 @@ You will then need to make a change to the manifest.appcache file to invalidate 
 Refresh the page in your browser.
 
 
-### Navigating config.json
-config.json is a JavaScript object containing map and layer configuration information.
+### Navigating config.js
+config.js contains map and layer configuration information.
 
 Most of the object properties should be self-explanatory with the explanation of web_service_base. This property is the base URL for a series of web services used for address searches, feature information, etc. These calls are using the [postgis-restful-web-service-framework](http://code.google.com/p/postgis-restful-web-service-framework/). If you just need a map, this isn't necessary.
 

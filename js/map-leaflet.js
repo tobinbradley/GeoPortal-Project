@@ -184,7 +184,7 @@ function toolbar(tool) {
     If no zoom passed zoom level doesn't change, it just pans.
 */
 function zoomToLonLat(data) {
-    if (data.zoom) map.setView(new L.LatLng(parseFloat(data.lat), parseFloat(data.lon)), data.zoom);
+    if (data.zoom) map.setView([parseFloat(data.lat), parseFloat(data.lon)], data.zoom);
 }
 
 
@@ -195,20 +195,24 @@ function zoomToLonLat(data) {
 */
 function addMarker(data) {
 
-    var blueIcon = L.Icon.extend({
-        iconUrl: './img/marker.png',
-        shadowUrl: './img/marker-shadow.png'
+    var blueIcon = new L.icon({
+        iconUrl: 'img/marker.png',
+        shadowUrl: 'img/marker-shadow.png'
     });
-    var orangeIcon = L.Icon.extend({
-        iconUrl: './img/marker2.png',
-        shadowUrl: './img/marker-shadow.png'
+    var orangeIcon = new L.icon({
+        iconUrl: 'img/marker2.png',
+        shadowUrl: 'img/marker-shadow.png'
     });
-    var icons = [new blueIcon(), new orangeIcon()];
+    var icons = [blueIcon, orangeIcon];
 
-    if (null != markers[data.featuretype]) map.removeLayer(markers[data.featuretype]);
-    markers[data.featuretype] = new L.Marker(new L.LatLng(parseFloat(data.lat), parseFloat(data.lon)), {
+    if (markers[data.featuretype]) {
+        try { map.removeLayer(markers[data.featuretype]); }
+        catch(err) {}
+    }
+    markers[data.featuretype] = L.marker([parseFloat(data.lat), parseFloat(data.lon)], {
         icon: icons[data.featuretype]
     });
+
     map.addLayer(markers[data.featuretype]);
 
     markers[data.featuretype].bindPopup(data.label).openPopup();

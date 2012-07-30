@@ -1,9 +1,8 @@
 CACHE MANIFEST
-# v2
+# v33
 
 # Explicitly cached 'master entries'.
 CACHE:
-index.html
 favicon.ico
 apple-touch-icon.png
 apple-touch-icon-72x72.png
@@ -11,8 +10,7 @@ apple-touch-icon-114x114.png
 apple-touch-icon-144x144.png
 css/style.css
 img/gp_logo.png
-img/car.png
-img/find.gif
+img/locate.gif
 img/marker.png
 img/marker2.png
 img/marker-shadow.png

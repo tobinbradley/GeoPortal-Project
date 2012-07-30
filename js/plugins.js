@@ -91,7 +91,7 @@ window.log = function(){
             try {
                 this.apply(d, args || []);
             } catch (err) {
-                console.log(err);
+                console.log(this.name, err);
             }
         });
     };

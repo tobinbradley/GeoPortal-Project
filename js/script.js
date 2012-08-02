@@ -75,7 +75,7 @@ $(document).ready(function() {
 
         // Process active record change
         if (theHash[1] && theHash[1] != selectedAddress.objectid) {
-            locationFinder("Address", 'master_address_table', 'objectid', theHash[1]);
+            locationFinder(theHash[1], "ADDRESS", "");
         }
 
         // Process accordion change
@@ -102,27 +102,23 @@ $(document).ready(function() {
         delay: 400,
         autoFocus: true,
         source: function(request, response) {
-
             $.ajax({
-                url: config.web_service_base + "v2/ws_geo_ubersearch.php",
+                url: config.web_service_base + "v3/ws_geo_ubersearch.php",
                 dataType: "jsonp",
                 data: {
-                    searchtypes: "Address,Library,School,Park,GeoName,Road,CATS,Intersection,PID",
+                    searchtypes: "address,library,school,park,geoname,road,cast,intersection,pid",
                     query: request.term
                 },
                 success: function(data) {
-                    if (data.total_rows > 0) {
-                        response($.map(data.rows, function(item) {
+                    if (data.length > 0) {
+                        response($.map(data, function(item) {
                             return {
-                                label: urldecode(item.row.displaytext),
-                                value: item.row.displaytext,
-                                responsetype: item.row.responsetype,
-                                responsetable: item.row.responsetable,
-                                getfield: item.row.getfield,
-                                getid: item.row.getid
+                                label: item.name,
+                                gid: item.gid,
+                                responsetype: item.type
                             };
                         }));
-                    } else if (data.total_rows == 0) {
+                    } else {
                         response($.map([{}], function(item) {
                             return {
                                 // No records found message
@@ -130,24 +126,14 @@ $(document).ready(function() {
                                 responsetype: "I've got nothing"
                             };
                         }));
-                    } else if (data.total_rows == -1) {
-                        response($.map([{}], function(item) {
-                            return {
-                                // Message indicating no search performed
-                                label: "More information needed for search.",
-                                responsetype: "More please"
-                            };
-                        }));
                     }
-
                 }
             });
         },
         select: function(event, ui) {
             $("#searchinput").autocomplete('widget').trigger('mousedown.choose_option');
-            // Run function on selected record
-            if (ui.item.responsetable) {
-                locationFinder(ui.item.responsetype, ui.item.responsetable, ui.item.getfield, ui.item.getid, ui.item.value);
+            if (ui.item.gid) {
+                locationFinder(ui.item.gid, ui.item.responsetype, ui.item.label);
             }
         },
         open: function(event, ui) {
@@ -303,17 +289,14 @@ function accordionDataClearShow() {
 
 /*
     Find locations
-    @param {string} findType  The type of find to perform
-    @param {string} findTable  The table to search on
-    @param {string} findField  The field to search in
     @param {string} findID  The value to search for
+    @param {string} findType  The type of find to perform
     @param {string} findValue  The value to search for (street name)
 */
-function locationFinder(findType, findTable, findField, findID, findValue) {
+function locationFinder(findID, findType, findValue) {
     switch (findType) {
-    case "Address":
+    case "ADDRESS":
     case "PID":
-    case "API":
         url = config.web_service_base + 'v2/ws_mat_addressnum.php?format=json&callback=?&jsonp=?&addressnum=' + findID;
         $.getJSON(url, function(data) {
             if (data.total_rows > 0) {
@@ -321,41 +304,42 @@ function locationFinder(findType, findTable, findField, findID, findValue) {
                 data.rows[0].row.lon = data.rows[0].row.longitude;
                 data.rows[0].row.lat = data.rows[0].row.latitude;
                 data.rows[0].row.featuretype = 0;
-                data.rows[0].row.label = data.rows[0].row.address;
+                data.rows[0].row.label = "<h5>Address</h5>" + data.rows[0].row.address;
                 data.rows[0].row.zoom = 17;
                 $.publish("/change/selected", [data.rows[0].row]);
                 $.publish("/change/hash");
-                $.publish("/change/accordion", [$("#accordion-data h3").eq($('#accordion-data').accordion('option', 'active')).attr("id")]);
+                $.publish("/change/accordion", [$("#accordion-data h3").eq($('#accordion-data').accordion('option', 'active')).prop("id")]);
             }
         });
         break;
-    case "Library":
-    case "Park":
-    case "School":
-    case "GeoName":
-    case "CATS":
+    case "LIBRARIES":
+    case "PARKS":
+    case "SCHOOLS":
+    case "GEONAMES":
+    case "CATS LIGHT RAIL":
+    case "CATS PARK AND RIDE":
         // Set list of fields to retrieve from POI Layers
-        poiFields = {
-            "libraries": "x(transform(the_geom, 4326)) as lon, y(transform(the_geom, 4326)) as lat, '<h5>' || name || '</h5><p>' || address || '</p>' AS label",
-            "schools_1011": "x(transform(the_geom, 4326)) as lon, y(transform(the_geom, 4326)) as lat, '<h5>' || coalesce(schlname,'') || '</h5><p>' || coalesce(type,'') || ' School</p><p>' || coalesce(address,'') || '</p>' AS label",
-            "parks": "x(transform(the_geom, 4326)) as lon, y(transform(the_geom, 4326)) as lat, '<h5>' || prkname || '</h5><p>Type: ' || prktype || '</p><p>' || prkaddr || '</p>' AS label",
-            "geonames": "longitude as lon, latitude as lat, '<h5>' || name || '</h5>'  as label",
-            "cats_light_rail_stations": "x(transform(the_geom, 4326)) as lon, y(transform(the_geom, 4326)) as lat, '<h5>' || name || '</h5><p></p>' as label",
-            "cats_park_and_ride": "x(transform(the_geom, 4326)) as lon, y(transform(the_geom, 4326)) as lat, '<h5>' || name || '</h5><p>Routes ' || routes || '</p><p>' || address || '</p>' AS label"
+        poiData = {
+            "LIBRARIES" : { "table": "libraries", "fields" : "x(transform(the_geom, 4326)) as lon, y(transform(the_geom, 4326)) as lat, '<h5>' || name || '</h5><p>' || address || '</p>' AS label" },
+            "PARKS": { "table": "parks" , "fields": "x(transform(the_geom, 4326)) as lon, y(transform(the_geom, 4326)) as lat, '<h5>' || prkname || '</h5><p>Type: ' || prktype || '</p><p>' || prkaddr || '</p>' AS label"},
+            "SCHOOLS": { "table": "schools_1112", "fields": "x(transform(the_geom, 4326)) as lon, y(transform(the_geom, 4326)) as lat, '<h5>' || coalesce(schlname,'') || '</h5><p>' || coalesce(type,'') || ' School</p><p>' || coalesce(address,'') || '</p>' AS label" },
+            "GEONAMES": { "table": "geonames", "fields": "longitude as lon, latitude as lat, '<h5>' || name || '</h5>'  as label" },
+            "CATS LIGHT RAIL": { "table": "cats_light_rail_stations", "fields": "x(transform(the_geom, 4326)) as lon, y(transform(the_geom, 4326)) as lat, '<h5>' || name || '</h5><p></p>' as label"},
+            "CATS PARK AND RIDE": { "table":  "cats_park_and_ride", "fields": "x(transform(the_geom, 4326)) as lon, y(transform(the_geom, 4326)) as lat, '<h5>' || name || '</h5><p>Routes ' || routes || '</p><p>' || address || '</p>' AS label"}
         };
-        url = config.web_service_base + "v1/ws_geo_attributequery.php?format=json&geotable=" + findTable + "&parameters=" + urlencode(findField + " = " + findID) + "&fields=" + urlencode(poiFields[findTable]) + '&callback=?';
+        url = config.web_service_base + "v1/ws_geo_attributequery.php?format=json&geotable=" + poiData[findType].table + "&parameters=gid = " + findID + "&fields=" + urlencode(poiData[findType].fields) + '&callback=?';
         $.getJSON(url, function(data) {
             $.publish("/layers/addmarker", [{
                 "lon": data.rows[0].row.lon,
                 "lat": data.rows[0].row.lat,
                 "featuretype": 1,
-                "label": data.rows[0].row.label,
+                "label": "<h5>Location</h5>" + data.rows[0].row.label,
                 "zoom": 16
             }]);
         });
         break;
-    case "Road":
-        url = config.web_service_base + "v1/ws_geo_getcentroid.php?format=json&geotable=" + findTable + "&parameters=streetname='" + findValue + "' order by ll_add limit 1&forceonsurface=true&srid=4326&callback=?";
+    case "ROADS":
+        url = config.web_service_base + "v1/ws_geo_getcentroid.php?format=json&geotable=roads&parameters=streetname='" + findValue.toUpperCase() + "' order by ll_add limit 1&forceonsurface=true&srid=4326&callback=?";
         $.getJSON(url, function(data) {
             $.publish("/layers/addmarker", [{
                 "lon": data.rows[0].row.x,
@@ -367,17 +351,17 @@ function locationFinder(findType, findTable, findField, findID, findValue) {
         });
 
         break;
-    case "Intersection":
+    case "INTERSECTION":
         url = config.web_service_base + "v1/ws_geo_centerlineintersection.php?format=json&callback=?";
-        streetnameArray = findID.split("&");
-        args = "&srid=4326&streetname1=" + urlencode(jQuery.trim(streetnameArray[0])) + "&streetname2=" + urlencode(jQuery.trim(streetnameArray[1]));
+        streetnameArray = findValue.split("&");
+        args = "&srid=4326&streetname1=" + urlencode(jQuery.trim(streetnameArray[0].toUpperCase())) + "&streetname2=" + urlencode(jQuery.trim(streetnameArray[1].toUpperCase()));
         $.getJSON(url + args, function(data) {
             if (data.total_rows > 0) {
                 $.publish("/layers/addmarker", [{
                     "lon": data.rows[0].row.xcoord,
                     "lat": data.rows[0].row.ycoord,
                     "featuretype": 1,
-                    "label": "<h5>Intersection</h5>" + findID,
+                    "label": "<h5>Intersection</h5>" + findValue,
                     "zoom": 15
                 }]);
             }

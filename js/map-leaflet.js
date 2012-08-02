@@ -158,7 +158,7 @@ function selectByCoordinate(lon, lat) {
             $.getJSON(url, function(data) {
                 if (data.total_rows > 0) {
                     message = "<h5>Identfy</h5>" + data.rows[0].row.address + "<br />PID: " + data.rows[0].row.parcel_id;
-                    message += "<br /><br /><strong><a href='javascript:void(0)' class='identify_select' data-matid='" + data.rows[0].row.objectid + "' onclick='locationFinder(\"Address\", \"master_address_table\", \"objectid\", " + data.rows[0].row.objectid + ");'>Select this Location</a></strong>";
+                    message += "<br /><br /><strong><a href='javascript:void(0)' class='identify_select' data-matid='" + data.rows[0].row.objectid + "' onclick='locationFinder(" + data.rows[0].row.objectid + ", \"ADDRESS\", \"\");'>Select this Location</a></strong>";
                     $.publish("/layers/addmarker", [{
                         "lon": data.rows[0].row.longitude,
                         "lat": data.rows[0].row.latitude,
@@ -195,14 +195,17 @@ function zoomToLonLat(data) {
 */
 function addMarker(data) {
 
-    var blueIcon = new L.icon({
-        iconUrl: 'img/marker.png',
-        shadowUrl: 'img/marker-shadow.png'
+    var myIcon = L.Icon.extend({
+        options: {
+            shadowUrl: 'img/marker-shadow.png',
+            iconAnchor:   [12, 41],
+            popupAnchor:  [2, -40],
+            iconSize:     [25, 41],
+            shadowSize:   [41, 41]
+        }
     });
-    var orangeIcon = new L.icon({
-        iconUrl: 'img/marker2.png',
-        shadowUrl: 'img/marker-shadow.png'
-    });
+    var blueIcon = new myIcon({iconUrl: 'img/marker.png'}),
+        orangeIcon = new myIcon({iconUrl: 'img/marker2.png'});
     var icons = [blueIcon, orangeIcon];
 
     if (markers[data.featuretype]) {
@@ -213,7 +216,5 @@ function addMarker(data) {
         icon: icons[data.featuretype]
     });
 
-    map.addLayer(markers[data.featuretype]);
-
-    markers[data.featuretype].bindPopup(data.label).openPopup();
+    markers[data.featuretype].addTo(map).bindPopup(data.label).openPopup();
 }

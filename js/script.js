@@ -131,19 +131,11 @@ $(document).ready(function() {
             });
         },
         select: function(event, ui) {
-            $("#searchinput").autocomplete('widget').trigger('mousedown.choose_option');
             if (ui.item.gid) {
                 locationFinder(ui.item.gid, ui.item.responsetype, ui.item.label);
             }
         },
         open: function(event, ui) {
-            // get enter/return for stubborn browsers
-            $(this).keypress(function(e) {
-
-                if (e.keyCode == 13 || e.keyCode == 39) {
-                    $($(this).data('autocomplete').menu.active).find('a').trigger('click');
-                }
-            });
             // Go if only 1 result
             menuItems = $("ul.ui-autocomplete li.ui-menu-item");
             if (menuItems.length == 1 && menuItems.text() != "More information needed for search." && menuItems.text() != "No records found.") {

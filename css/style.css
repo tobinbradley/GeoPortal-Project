@@ -315,7 +315,7 @@ input::-moz-placeholder, textarea::-moz-placeholder { color: #7C7C7C; }
 
 
 /* Map */
-#toolbar-text-output { font-size: 0.8em; position: absolute;  right: 4px; padding-top: 5px; }
+#toolbar-text-output { font-size: 0.8em; position: absolute; right: 4px; padding-top: 5px; }
 #mapcontrols { float: left; }
 #map { border: 1px solid #D9D9D9; }
 #opacitySlider { margin: 18px auto 30px auto; width: 90%}

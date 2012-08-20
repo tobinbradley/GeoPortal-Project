@@ -226,7 +226,6 @@ td { vertical-align: top; }
 .mute { color: #77787B; font-size: 0.9em; }
 .mute a { color: #77787B; font-weight: bold; }
 
-
 /* some sensible defaults */
 body { font-family:  Helmet, Freesans, sans-serif; font-size: 12px; font-variant: normal; }
 * { -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box; }

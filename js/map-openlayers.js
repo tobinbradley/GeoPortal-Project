@@ -134,7 +134,7 @@ function addMapLayers(layersArray) {
             if (value.id == "osm") {
                 layer = new OpenLayers.Layer.OSM("OpenStreetMap");
             } else {
-                layer = new OpenLayers.Layer.XYZ(value.name, value.wmsurl);
+                layer = new OpenLayers.Layer.XYZ(value.name, value.wmsurl.replace(/\{/g, "${") );
             }
         } else {
             layer = new OpenLayers.Layer.WMS(

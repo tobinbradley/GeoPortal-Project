@@ -11,7 +11,7 @@ var config = {
         "wmsurl": "http://maps.co.mecklenburg.nc.us/mbtiles/mbtiles-server.php?db=meckbase.mbtiles&z={z}&x={x}&y={y}.png",
         "maxZoom": 18,
         "minZoom": 9,
-        "isVisible": true,
+        "isVisible": false,
         "isBaseLayer": true
     }, {
         "id": "osm",
@@ -20,7 +20,7 @@ var config = {
         "wmsurl": "http://tile.openstreetmap.org/{z}/{x}/{y}.png",
         "maxZoom": 18,
         "minZoom": 9,
-        "isVisible": false,
+        "isVisible": true,
         "isBaseLayer": true
     }],
     "overlay_map_layers": [{

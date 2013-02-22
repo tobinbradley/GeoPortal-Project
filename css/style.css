@@ -265,7 +265,7 @@ aside {
   overflow: hidden;
   margin: 0 5px 5px 5px;
 }
-#toolbar { position: absolute; right: 0; left: 0; top: 0; padding: 0;  overflow: hidden; }
+#toolbar { position: absolute; right: 0; left: 0; top: 0; padding: 0; height: 30px; overflow: hidden; }
 #map { position: absolute; top: 32px; left: 0; right: 0; bottom: 0; background: white; overflow: hidden; }
 .ie7 #map-container { left: 400px; }
 

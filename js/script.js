@@ -13,18 +13,17 @@ var layersControl; // Leaflet layer control
 /*  Document Ready  */
 $(document).ready(function() {
 
-    theHash = window.location.hash.split("/");
     // jQuery UI Accordion
     $('#accordion-data').accordion({
         header: "h3",
-        active: theHash[2] && $("#accordion-data h3").index($("h3#" + theHash[2] )) !== -1 ? $("#accordion-data h3").index($("h3#" + theHash[2])) : 0,
         collapsible: true,
-        autoHeight: false,
+        heightStyle: "content",
         create: function(event, ui) {
             $(this).fadeIn("slow");
+        },
+        activate: function(event, ui) {
+            if (ui.newHeader[0]) $.publish("/change/accordion", [ui.newHeader[0].id]);
         }
-    }).bind("accordionchange", function(event, ui) {
-        if (ui.newHeader[0]) $.publish("/change/accordion", [ui.newHeader[0].id]);
     });
 
     // jQuery UI Dialogs
@@ -85,24 +84,7 @@ $(document).ready(function() {
     });
     $("#toolbar").fadeIn("slow");
 
-    // URL Hash Change Handler
-    $(window).hashchange(function() {
-        // read the hash
-        theHash = window.location.hash.split("/");
-
-        // Process active record change
-        if (theHash[1] && theHash[1] != selectedAddress.objectid) {
-            locationFinder(theHash[1], "ADDRESS", "");
-        }
-
-        // Process accordion change
-        if (theHash[2] && theHash[2] != $("#accordion-data h3").eq($('#accordion-data').accordion('option', 'active')).attr("id")) {
-            $('#accordion-data').accordion('activate', '#' + theHash[2]);
-        }
-    });
-
     // Inital PubSub Subscriptions
-    $.subscribe("/change/hash", changeHash); // Hash change control
     $.subscribe("/change/selected", setSelectedAddress); // Selected record change
     $.subscribe("/change/selected", setLocationText); // Selected record change
     $.subscribe("/change/selected", accordionDataClearShow); // Selected record change
@@ -114,7 +96,63 @@ $(document).ready(function() {
     $.subscribe("/map/panzoom", zoomToLonLat); // Zoom to location
 
     // jQuery UI Autocomplete
-    $("#searchinput").autocomplete({
+    $.widget( "custom.catcomplete", $.ui.autocomplete, {
+        _renderMenu: function( ul, items ) {
+            var that = this,
+                currentCategory = "";
+            $.each( items, function( index, item ) {
+                if ( item.category != currentCategory ) {
+                    ul.append( "<li class='ui-autocomplete-category'>" + item.responsetype + "</li>" );
+                    currentCategory = item.category;
+                }
+                that._renderItemData( ul, item );
+            });
+        }
+    });
+    $("#searchinput").catcomplete({
+        minLength: 4,
+        delay: 400,
+        autoFocus: true,
+        source: function(request, response) {
+            $.ajax({
+                url: config.web_service_base + "v4/ws_geo_ubersearch.php",
+                dataType: "jsonp",
+                data: {
+                    searchtypes: "address,library,school,park,geoname,cast,nsa,intersection,pid,business",
+                    query: request.term
+                },
+                success: function(data) {
+                    if (data.length > 0) {
+                        response($.map(data, function(item) {
+                            return {
+                                label: item.name,
+                                gid: item.gid,
+                                responsetype: item.type,
+                                lng: item.lng,
+                                lat: item.lat
+                            };
+                        }));
+                    } else {
+                        response($.map([{}], function(item) {
+                            return { label: "More information needed or no records found.", responsetype: "I've got nothing" };
+                        }));
+                    }
+                }
+            });
+        },
+        select: function(event, ui) {
+            locationFinder(ui.item.gid, ui.item.responsetype, ui.item.label);
+        },
+        open: function(event, ui) {
+            menuItems = $("ul.ui-autocomplete li.ui-menu-item");
+            if (menuItems.length == 1 && menuItems.text() != "More information needed or no records found." ) {
+                $(".ui-autocomplete .ui-menu-item a").trigger("click");
+            }
+        }
+    });
+
+    // jQuery UI Autocomplete
+    /*$("#searchinput").autocomplete({
         minLength: 4,
         delay: 400,
         autoFocus: true,
@@ -169,7 +207,7 @@ $(document).ready(function() {
             }
             self._renderItem(ul, item);
         });
-    };
+    };*/
 
 });
 
@@ -183,26 +221,15 @@ $(window).load(function() {
     // Initialize Map
     initializeMap();
 
-    // Process the hash
-    $(window).hashchange();
-
 });
 
-
-/*  Hash change handler  */
-
-function changeHash(objectid, tabid) {
-    var key = objectid || selectedAddress.objectid || "";
-    var tab = tabid || $("#accordion-data h3").eq($("#accordion-data").accordion("option", "active")).attr("id");
-    window.location.hash = "/" + key + "/" + tab;
-}
 
 /*
     Accordion switch handler
     You can toggle a layer when an accordion activates via toggleLayer(layerID)
 */
 function processAccordionDataChange(accordionValue) {
-    $.publish("/change/hash", [null, accordionValue]);
+    console.log(accordionValue);
     if (selectedAddress.objectid) { // Make sure an address is selected
         switch (accordionValue) {
 
@@ -316,7 +343,6 @@ function locationFinder(findID, findType, findValue) {
                 data.rows[0].row.label = "<h5>Address</h5>" + data.rows[0].row.address;
                 data.rows[0].row.zoom = 17;
                 $.publish("/change/selected", [data.rows[0].row]);
-                $.publish("/change/hash");
                 $.publish("/change/accordion", [$("#accordion-data h3").eq($('#accordion-data').accordion('option', 'active')).prop("id")]);
             }
         });
